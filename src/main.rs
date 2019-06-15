@@ -1,96 +1,65 @@
 use ggez::conf::Conf;
 use ggez::event::{self, EventHandler};
 use ggez::filesystem;
-use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Image};
+use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Image, Rect};
 use ggez::nalgebra::{Point2, Vector2};
-use ggez::timer::delta;
 use ggez::{Context, ContextBuilder, GameResult};
-use std::collections::HashMap;
-use std::io::Read;
-use std::time::Duration;
+use std::io::BufReader;
+use tiled::{parse, Map};
 
 struct State {
-    dt: Duration,
-    spritebatches: HashMap<Tiles, SpriteBatch>,
-    map: Vec<char>,
-}
-
-#[derive(Debug, PartialEq, Eq, Hash)]
-enum Tiles {
-    Grass,
-    Dirt,
+    spritebatch: SpriteBatch,
+    map: Map,
 }
 
 impl State {
     fn new(context: &mut Context) -> GameResult<State> {
-        let mut grass = Image::new(context, "/grass.png")?;
-        grass.set_filter(FilterMode::Nearest);
+        let mut tileset = Image::new(context, "/tileset.png")?;
+        tileset.set_filter(FilterMode::Nearest);
 
-        let mut dirt = Image::new(context, "/dirt.png")?;
-        dirt.set_filter(FilterMode::Nearest);
-
-        let mut spritebatches = HashMap::new();
-        spritebatches.insert(Tiles::Grass, SpriteBatch::new(grass));
-        spritebatches.insert(Tiles::Dirt, SpriteBatch::new(dirt));
-
-        let mut map_str = String::new();
-        filesystem::open(context, "/map.txt")
-            .unwrap()
-            .read_to_string(&mut map_str)
-            .unwrap();
+        let reader = BufReader::new(filesystem::open(context, "/map.tmx")?);
 
         Ok(State {
-            dt: Duration::new(0, 0),
-            spritebatches,
-            map: map_str.replace("\n", "").chars().collect(),
+            spritebatch: SpriteBatch::new(tileset),
+            map: parse(reader).unwrap(),
         })
     }
 }
 
 const TILE_SIZE: f32 = 16.0;
-const TILE_SCALE: f32 = 4.0;
+const TILE_SCALE: f32 = 3.0;
 
 impl EventHandler for State {
-    fn update(&mut self, context: &mut Context) -> GameResult {
-        self.dt = delta(context);
+    fn update(&mut self, _context: &mut Context) -> GameResult {
         Ok(())
     }
 
     fn draw(&mut self, context: &mut Context) -> GameResult {
         graphics::clear(context, graphics::BLACK);
 
-        for x in 0..4 {
-            for y in 0..4 {
-                let draw_param = DrawParam::default()
-                    .dest(Point2::new(
-                        TILE_SIZE * TILE_SCALE * x as f32,
-                        TILE_SIZE * TILE_SCALE * y as f32,
-                    ))
-                    .scale(Vector2::new(TILE_SCALE, TILE_SCALE));
+        for layer in self.map.layers.iter() {
+            for x in 0..self.map.width {
+                for y in 0..self.map.height {
+                    let draw_param = DrawParam::default()
+                        .dest(Point2::new(
+                            TILE_SIZE * TILE_SCALE * x as f32,
+                            TILE_SIZE * TILE_SCALE * y as f32,
+                        ))
+                        .scale(Vector2::new(TILE_SCALE, TILE_SCALE))
+                        .src(match layer.tiles[y as usize][x as usize] {
+                            1 => Rect::new(0.0, 0.0, 1.0 / 3.0, 1.0),
+                            2 => Rect::new(1.0 / 3.0, 0.0, 2.0 / 3.0, 1.0),
+                            3 => Rect::new(2.0 / 3.0, 0.0, 1.0, 1.0),
+                            _ => Rect::zero(),
+                        });
 
-                let index = (x as usize) + (y as usize * 4);
-                match self.map[index] {
-                    'G' => {
-                        self.spritebatches
-                            .get_mut(&Tiles::Grass)
-                            .unwrap()
-                            .add(draw_param);
-                    }
-                    'D' => {
-                        self.spritebatches
-                            .get_mut(&Tiles::Dirt)
-                            .unwrap()
-                            .add(draw_param);
-                    }
-                    _ => (),
+                    self.spritebatch.add(draw_param);
                 }
             }
         }
 
-        for (_, spritebatch) in self.spritebatches.iter_mut() {
-            graphics::draw(context, spritebatch, DrawParam::default())?;
-            spritebatch.clear();
-        }
+        graphics::draw(context, &self.spritebatch, DrawParam::default())?;
+        self.spritebatch.clear();
 
         graphics::present(context)?;
         Ok(())
