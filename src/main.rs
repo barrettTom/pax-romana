@@ -1,5 +1,5 @@
 use ggez::conf::Conf;
-use ggez::event::{self, EventHandler};
+use ggez::event::{self, EventHandler, KeyCode, KeyMods};
 use ggez::filesystem;
 use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Image};
 use ggez::nalgebra::{Point2, Vector2};
@@ -12,6 +12,7 @@ struct State {
     map: Map,
     tileset: Tileset,
     spritebatch: SpriteBatch,
+    camera_point: (f32, f32),
 }
 
 impl State {
@@ -23,12 +24,13 @@ impl State {
             map: Map::new(filesystem::open(context, "/map.tmx")?),
             tileset: Tileset::new(filesystem::open(context, "/tileset.tsx")?),
             spritebatch: SpriteBatch::new(image),
+            camera_point: (0.0, 0.0),
         })
     }
 }
 
 impl EventHandler for State {
-    fn update(&mut self, _context: &mut Context) -> GameResult {
+    fn update(&mut self, _: &mut Context) -> GameResult {
         Ok(())
     }
 
@@ -51,11 +53,24 @@ impl EventHandler for State {
             }
         }
 
-        graphics::draw(context, &self.spritebatch, DrawParam::default())?;
+        let draw_param =
+            DrawParam::default().dest(Point2::new(self.camera_point.0, self.camera_point.1));
+
+        graphics::draw(context, &self.spritebatch, draw_param)?;
         self.spritebatch.clear();
 
         graphics::present(context)?;
         Ok(())
+    }
+
+    fn key_down_event(&mut self, _: &mut Context, keycode: KeyCode, _: KeyMods, _: bool) {
+        match keycode {
+            KeyCode::W => self.camera_point.1 += constants::CAMERA_MOVE,
+            KeyCode::A => self.camera_point.0 += constants::CAMERA_MOVE,
+            KeyCode::S => self.camera_point.1 -= constants::CAMERA_MOVE,
+            KeyCode::D => self.camera_point.0 -= constants::CAMERA_MOVE,
+            _ => (),
+        }
     }
 }
 
