@@ -2,24 +2,6 @@ use ggez::filesystem::File;
 use std::io::BufReader;
 use xml::reader::{EventReader, XmlEvent};
 
-pub struct Layer {
-    pub id: usize,
-    pub data: Vec<usize>,
-}
-
-impl Layer {
-    pub fn new(text: String, id: usize) -> Layer {
-        Layer {
-            id,
-            data: text
-                .replace("\n", "")
-                .split(',')
-                .map(|s| s.parse().unwrap())
-                .collect(),
-        }
-    }
-}
-
 pub struct Map {
     pub width: usize,
     pub height: usize,
@@ -47,7 +29,7 @@ impl Map {
                     }
                 }
             } else if let Ok(XmlEvent::Characters(text)) = e {
-                layers.push(Layer::new(text, layers.len() + 1));
+                layers.push(Layer::new(text));
             }
         }
 
@@ -59,3 +41,18 @@ impl Map {
     }
 }
 
+pub struct Layer {
+    pub data: Vec<usize>,
+}
+
+impl Layer {
+    pub fn new(text: String) -> Layer {
+        Layer {
+            data: text
+                .replace("\n", "")
+                .split(',')
+                .map(|s| s.parse().unwrap())
+                .collect(),
+        }
+    }
+}
