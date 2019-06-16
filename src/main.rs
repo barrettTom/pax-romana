@@ -1,33 +1,30 @@
 use ggez::conf::Conf;
 use ggez::event::{self, EventHandler};
 use ggez::filesystem;
-use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Image, Rect};
+use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Image};
 use ggez::nalgebra::{Point2, Vector2};
 use ggez::{Context, ContextBuilder, GameResult};
-use std::io::BufReader;
-use tiled::{parse, Map};
+use pax_romana::constants;
+use pax_romana::map::{Map, Tileset};
 
 struct State {
-    spritebatch: SpriteBatch,
     map: Map,
+    tileset: Tileset,
+    spritebatch: SpriteBatch,
 }
 
 impl State {
     fn new(context: &mut Context) -> GameResult<State> {
-        let mut tileset = Image::new(context, "/tileset.png")?;
-        tileset.set_filter(FilterMode::Nearest);
-
-        let reader = BufReader::new(filesystem::open(context, "/map.tmx")?);
+        let mut image = Image::new(context, "/tileset.png")?;
+        image.set_filter(FilterMode::Nearest);
 
         Ok(State {
-            spritebatch: SpriteBatch::new(tileset),
-            map: parse(reader).unwrap(),
+            map: Map::new(filesystem::open(context, "/map.tmx")?),
+            tileset: Tileset::new(filesystem::open(context, "/tileset.tsx")?),
+            spritebatch: SpriteBatch::new(image),
         })
     }
 }
-
-const TILE_SIZE: f32 = 16.0;
-const TILE_SCALE: f32 = 3.0;
 
 impl EventHandler for State {
     fn update(&mut self, _context: &mut Context) -> GameResult {
@@ -37,24 +34,17 @@ impl EventHandler for State {
     fn draw(&mut self, context: &mut Context) -> GameResult {
         graphics::clear(context, graphics::BLACK);
 
-        for layer in self.map.layers.iter() {
-            for x in 0..self.map.width {
-                for y in 0..self.map.height {
-                    let draw_param = DrawParam::default()
-                        .dest(Point2::new(
-                            TILE_SIZE * TILE_SCALE * x as f32,
-                            TILE_SIZE * TILE_SCALE * y as f32,
-                        ))
-                        .scale(Vector2::new(TILE_SCALE, TILE_SCALE))
-                        .src(match layer.tiles[y as usize][x as usize] {
-                            1 => Rect::new(0.0, 0.0, 1.0 / 3.0, 1.0),
-                            2 => Rect::new(1.0 / 3.0, 0.0, 2.0 / 3.0, 1.0),
-                            3 => Rect::new(2.0 / 3.0, 0.0, 1.0, 1.0),
-                            _ => Rect::zero(),
-                        });
+        for x in 0..self.map.width {
+            for y in 0..self.map.height {
+                let draw_param = DrawParam::default()
+                    .src(self.tileset.tiles[self.map.data[x + (y * self.map.height)]])
+                    .dest(Point2::new(
+                        self.tileset.tile_width * constants::TILE_SCALE * x as f32,
+                        self.tileset.tile_height * constants::TILE_SCALE * y as f32,
+                    ))
+                    .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE));
 
-                    self.spritebatch.add(draw_param);
-                }
+                self.spritebatch.add(draw_param);
             }
         }
 
