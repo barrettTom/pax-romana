@@ -1,11 +1,11 @@
 use ggez::filesystem::File;
 use ggez::graphics::{spritebatch::SpriteBatch, DrawParam};
 use ggez::nalgebra::{Point2, Vector2};
-use std::io::BufReader;
-use xml::reader::{EventReader, XmlEvent};
+use xml::reader::XmlEvent::Characters;
 
 use crate::constants;
 use crate::tileset::Tileset;
+use crate::xmlelements::XMLElements;
 
 pub struct Map {
     pub width: usize,
@@ -15,33 +15,28 @@ pub struct Map {
 
 impl Map {
     pub fn new(file: File) -> Map {
-        let mut width = None;
-        let mut height = None;
-        let mut layers = Vec::new();
+        let elements = XMLElements::new(file);
 
-        for e in EventReader::new(BufReader::new(file)) {
-            if let Ok(XmlEvent::StartElement {
-                name, attributes, ..
-            }) = e
-            {
-                if name.local_name == "map" {
-                    for attribute in attributes {
-                        match attribute.name.local_name.as_str() {
-                            "width" => width = Some(attribute.value.parse::<usize>().unwrap()),
-                            "height" => height = Some(attribute.value.parse::<usize>().unwrap()),
-                            _ => (),
-                        }
-                    }
+        let width = elements.get_element_attribute("map", "width").unwrap();
+
+        let height = elements.get_element_attribute("map", "height").unwrap();
+
+        let layers = elements
+            .events
+            .iter()
+            .filter_map(|e| {
+                if let Characters(text) = e {
+                    Some(Layer::new(text.to_string()))
+                } else {
+                    None
                 }
-            } else if let Ok(XmlEvent::Characters(text)) = e {
-                layers.push(Layer::new(text));
-            }
-        }
+            })
+            .collect();
 
         Map {
             layers,
-            width: width.unwrap(),
-            height: height.unwrap(),
+            width,
+            height,
         }
     }
 
