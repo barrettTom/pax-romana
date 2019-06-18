@@ -1,12 +1,15 @@
-use ggez::{conf::Conf, event, ContextBuilder, GameResult};
+use ggez::conf::{NumSamples, WindowSetup};
+use ggez::{event, ContextBuilder, GameResult};
 
 use pax_romana::state::State;
 
 fn main() -> GameResult {
-    let conf = Conf::new();
-
     let (ref mut context, ref mut event_loop) = ContextBuilder::new("pax-romana", "tom barrett")
-        .conf(conf)
+        .window_setup(
+            WindowSetup::default()
+                .title("pax_romana")
+                .samples(NumSamples::Two),
+        )
         .add_resource_path("./resources")
         .build()?;
 
