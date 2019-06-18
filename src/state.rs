@@ -1,8 +1,9 @@
 use ggez::event::{EventHandler, KeyCode, KeyMods};
-use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Image};
-use ggez::nalgebra::{Point2, Vector2};
+use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Image, Text};
+use ggez::nalgebra::Point2;
 use ggez::{filesystem, Context, GameResult};
 
+use crate::camera::Camera;
 use crate::constants;
 use crate::map::Map;
 use crate::tileset::Tileset;
@@ -11,7 +12,8 @@ pub struct State {
     map: Map,
     tileset: Tileset,
     spritebatch: SpriteBatch,
-    camera_point: (f32, f32),
+    camera: Camera,
+    player_position: Point2<f32>,
 }
 
 impl State {
@@ -23,51 +25,48 @@ impl State {
             map: Map::new(filesystem::open(context, "/map.tmx")?),
             tileset: Tileset::new(filesystem::open(context, "/tileset.tsx")?),
             spritebatch: SpriteBatch::new(image),
-            camera_point: (0.0, 0.0),
+            camera: Camera::default(),
+            player_position: Point2::new(0.0, 0.0),
         })
     }
 }
 
 impl EventHandler for State {
     fn update(&mut self, _: &mut Context) -> GameResult {
+        self.camera.give_center(self.player_position);
         Ok(())
     }
 
     fn draw(&mut self, context: &mut Context) -> GameResult {
         graphics::clear(context, graphics::BLACK);
 
-        for layer in self.map.layers.iter() {
-            for x in 0..self.map.width {
-                for y in 0..self.map.height {
-                    let draw_param = DrawParam::default()
-                        .src(self.tileset.tiles[layer.data[x + (y * self.map.height)]])
-                        .dest(Point2::new(
-                            self.tileset.tile_width * constants::TILE_SCALE * x as f32,
-                            self.tileset.tile_height * constants::TILE_SCALE * y as f32,
-                        ))
-                        .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE));
+        self.map.draw(&mut self.spritebatch, &self.tileset);
 
-                    self.spritebatch.add(draw_param);
-                }
-            }
-        }
+        graphics::draw(
+            context,
+            &self.spritebatch,
+            DrawParam::default().dest(self.camera.draw),
+        )?;
 
-        let draw_param =
-            DrawParam::default().dest(Point2::new(self.camera_point.0, self.camera_point.1));
+        graphics::draw(
+            context,
+            &Text::new("@"),
+            DrawParam::default().dest(self.player_position),
+        )?;
 
-        graphics::draw(context, &self.spritebatch, draw_param)?;
         self.spritebatch.clear();
 
         graphics::present(context)?;
+
         Ok(())
     }
 
     fn key_down_event(&mut self, _: &mut Context, keycode: KeyCode, _: KeyMods, _: bool) {
         match keycode {
-            KeyCode::W => self.camera_point.1 += constants::CAMERA_MOVE,
-            KeyCode::A => self.camera_point.0 += constants::CAMERA_MOVE,
-            KeyCode::S => self.camera_point.1 -= constants::CAMERA_MOVE,
-            KeyCode::D => self.camera_point.0 -= constants::CAMERA_MOVE,
+            KeyCode::W => self.player_position.y -= constants::PLAYER_SPEED,
+            KeyCode::A => self.player_position.x -= constants::PLAYER_SPEED,
+            KeyCode::S => self.player_position.y += constants::PLAYER_SPEED,
+            KeyCode::D => self.player_position.x += constants::PLAYER_SPEED,
             _ => (),
         }
     }

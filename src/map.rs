@@ -1,6 +1,11 @@
 use ggez::filesystem::File;
+use ggez::graphics::{spritebatch::SpriteBatch, DrawParam};
+use ggez::nalgebra::{Point2, Vector2};
 use std::io::BufReader;
 use xml::reader::{EventReader, XmlEvent};
+
+use crate::constants;
+use crate::tileset::Tileset;
 
 pub struct Map {
     pub width: usize,
@@ -37,6 +42,24 @@ impl Map {
             layers,
             width: width.unwrap(),
             height: height.unwrap(),
+        }
+    }
+
+    pub fn draw(&mut self, spritebatch: &mut SpriteBatch, tileset: &Tileset) {
+        for layer in self.layers.iter() {
+            for x in 0..self.width {
+                for y in 0..self.height {
+                    let draw_param = DrawParam::default()
+                        .src(tileset.tiles[layer.data[x + (y * self.height)]])
+                        .dest(Point2::new(
+                            tileset.tile_width * constants::TILE_SCALE * x as f32,
+                            tileset.tile_height * constants::TILE_SCALE * y as f32,
+                        ))
+                        .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE));
+
+                    spritebatch.add(draw_param);
+                }
+            }
         }
     }
 }
