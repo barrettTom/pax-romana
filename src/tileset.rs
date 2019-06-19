@@ -1,30 +1,23 @@
 use ggez::filesystem::File;
 use ggez::graphics::Rect;
 
+use crate::constants;
 use crate::xmlelements::XMLElements;
 
 pub struct Tileset {
     pub tiles: Vec<Rect>,
-    pub tile_width: f32,
-    pub tile_height: f32,
 }
 
 impl Tileset {
     pub fn new(file: File) -> Tileset {
         let elements = XMLElements::new(file);
 
+        let height = elements.get_element_attribute("image", "height").unwrap();
         let columns = elements
             .get_element_attribute("tileset", "columns")
             .unwrap();
-        let height = elements.get_element_attribute("image", "height").unwrap();
-        let tile_width = elements
-            .get_element_attribute("tileset", "tilewidth")
-            .unwrap() as f32;
-        let tile_height = elements
-            .get_element_attribute("tileset", "tileheight")
-            .unwrap() as f32;
 
-        let rows = height / (tile_height as usize);
+        let rows = height / (constants::TILE_HEIGHT as usize);
 
         let mut tiles = Vec::new();
         tiles.push(Rect::zero());
@@ -39,10 +32,6 @@ impl Tileset {
             }
         }
 
-        Tileset {
-            tiles,
-            tile_height,
-            tile_width,
-        }
+        Tileset { tiles }
     }
 }

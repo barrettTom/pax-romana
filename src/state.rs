@@ -1,11 +1,11 @@
 use ggez::event::{EventHandler, KeyCode, KeyMods};
-use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Image, Text};
-use ggez::nalgebra::Point2;
+use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Image};
 use ggez::{filesystem, Context, GameResult};
 
 use crate::camera::Camera;
 use crate::constants;
 use crate::map::Map;
+use crate::player::Player;
 use crate::tileset::Tileset;
 
 pub struct State {
@@ -13,7 +13,7 @@ pub struct State {
     tileset: Tileset,
     spritebatch: SpriteBatch,
     camera: Camera,
-    player_position: Point2<f32>,
+    player: Player,
 }
 
 impl State {
@@ -21,19 +21,22 @@ impl State {
         let mut image = Image::new(context, "/tileset.png")?;
         image.set_filter(FilterMode::Nearest);
 
+        let map = Map::new(filesystem::open(context, "/map.tmx")?);
+        let map_dimensions = map.get_dimensions();
+
         Ok(State {
-            map: Map::new(filesystem::open(context, "/map.tmx")?),
+            map,
             tileset: Tileset::new(filesystem::open(context, "/tileset.tsx")?),
             spritebatch: SpriteBatch::new(image),
-            camera: Camera::new(context),
-            player_position: Point2::new(0.0, 0.0),
+            camera: Camera::new(context, map_dimensions),
+            player: Player::new(),
         })
     }
 }
 
 impl EventHandler for State {
     fn update(&mut self, _: &mut Context) -> GameResult {
-        self.camera.give_center(self.player_position);
+        self.camera.give_center(self.player.position);
         Ok(())
     }
 
@@ -41,6 +44,7 @@ impl EventHandler for State {
         graphics::clear(context, graphics::BLACK);
 
         self.map.draw(&mut self.spritebatch, &self.tileset);
+        self.player.draw(&mut self.spritebatch, &self.tileset);
 
         graphics::draw(
             context,
@@ -50,15 +54,6 @@ impl EventHandler for State {
 
         self.spritebatch.clear();
 
-        graphics::draw(
-            context,
-            &Text::new("@"),
-            DrawParam::default().dest(Point2::new(
-                self.player_position.x + self.camera.draw.x,
-                self.player_position.y + self.camera.draw.y,
-            )),
-        )?;
-
         graphics::present(context)?;
 
         Ok(())
@@ -66,10 +61,10 @@ impl EventHandler for State {
 
     fn key_down_event(&mut self, context: &mut Context, keycode: KeyCode, _: KeyMods, _: bool) {
         match keycode {
-            KeyCode::W => self.player_position.y -= constants::PLAYER_SPEED,
-            KeyCode::A => self.player_position.x -= constants::PLAYER_SPEED,
-            KeyCode::S => self.player_position.y += constants::PLAYER_SPEED,
-            KeyCode::D => self.player_position.x += constants::PLAYER_SPEED,
+            KeyCode::W => self.player.position.y -= constants::PLAYER_SPEED,
+            KeyCode::A => self.player.position.x -= constants::PLAYER_SPEED,
+            KeyCode::S => self.player.position.y += constants::PLAYER_SPEED,
+            KeyCode::D => self.player.position.x += constants::PLAYER_SPEED,
             KeyCode::Q => context.continuing = false,
             _ => (),
         }

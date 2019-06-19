@@ -18,9 +18,7 @@ impl Map {
         let elements = XMLElements::new(file);
 
         let width = elements.get_element_attribute("map", "width").unwrap();
-
         let height = elements.get_element_attribute("map", "height").unwrap();
-
         let layers = elements
             .events
             .iter()
@@ -40,15 +38,15 @@ impl Map {
         }
     }
 
-    pub fn draw(&mut self, spritebatch: &mut SpriteBatch, tileset: &Tileset) {
+    pub fn draw(&self, spritebatch: &mut SpriteBatch, tileset: &Tileset) {
         for layer in self.layers.iter() {
             for x in 0..self.width {
                 for y in 0..self.height {
                     let draw_param = DrawParam::default()
                         .src(tileset.tiles[layer.data[x + (y * self.height)]])
                         .dest(Point2::new(
-                            tileset.tile_width * constants::TILE_SCALE * x as f32,
-                            tileset.tile_height * constants::TILE_SCALE * y as f32,
+                            constants::TILE_WIDTH * constants::TILE_SCALE * x as f32,
+                            constants::TILE_HEIGHT * constants::TILE_SCALE * y as f32,
                         ))
                         .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE));
 
@@ -56,6 +54,13 @@ impl Map {
                 }
             }
         }
+    }
+
+    pub fn get_dimensions(&self) -> (f32, f32) {
+        (
+            (constants::TILE_WIDTH * constants::TILE_SCALE) * self.width as f32,
+            (constants::TILE_HEIGHT * constants::TILE_SCALE) * self.height as f32,
+        )
     }
 }
 
