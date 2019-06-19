@@ -3,7 +3,6 @@ use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Imag
 use ggez::{filesystem, Context, GameResult};
 
 use crate::camera::Camera;
-use crate::constants;
 use crate::map::Map;
 use crate::player::Player;
 use crate::tileset::Tileset;
@@ -36,6 +35,7 @@ impl State {
 
 impl EventHandler for State {
     fn update(&mut self, _: &mut Context) -> GameResult {
+        self.player.update();
         self.camera.give_center(self.player.position);
         Ok(())
     }
@@ -59,14 +59,22 @@ impl EventHandler for State {
         Ok(())
     }
 
-    fn key_down_event(&mut self, context: &mut Context, keycode: KeyCode, _: KeyMods, _: bool) {
-        match keycode {
-            KeyCode::W => self.player.position.y -= constants::PLAYER_SPEED,
-            KeyCode::A => self.player.position.x -= constants::PLAYER_SPEED,
-            KeyCode::S => self.player.position.y += constants::PLAYER_SPEED,
-            KeyCode::D => self.player.position.x += constants::PLAYER_SPEED,
-            KeyCode::Q => context.continuing = false,
-            _ => (),
+    fn key_down_event(
+        &mut self,
+        context: &mut Context,
+        keycode: KeyCode,
+        _: KeyMods,
+        repeat: bool,
+    ) {
+        if !repeat {
+            match keycode {
+                KeyCode::Q => context.continuing = false,
+                _ => self.player.give_key_down(keycode),
+            }
         }
+    }
+
+    fn key_up_event(&mut self, _: &mut Context, keycode: KeyCode, _: KeyMods) {
+        self.player.give_key_up(keycode)
     }
 }
