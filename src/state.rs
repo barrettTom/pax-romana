@@ -34,8 +34,8 @@ impl State {
 }
 
 impl EventHandler for State {
-    fn update(&mut self, _: &mut Context) -> GameResult {
-        self.player.update();
+    fn update(&mut self, context: &mut Context) -> GameResult {
+        self.player.update(context);
         self.camera.give_center(self.player.position);
         Ok(())
     }
@@ -44,7 +44,7 @@ impl EventHandler for State {
         graphics::clear(context, graphics::BLACK);
 
         self.map.draw(&mut self.spritebatch, &self.tileset);
-        self.player.draw(&mut self.spritebatch, &self.tileset);
+        self.player.draw(&mut self.spritebatch);
 
         graphics::draw(
             context,
