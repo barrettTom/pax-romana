@@ -28,7 +28,7 @@ impl State {
             tileset: Tileset::new(filesystem::open(context, "/tileset.tsx")?),
             spritebatch: SpriteBatch::new(image),
             camera: Camera::new(context, map_dimensions),
-            player: Player::new(),
+            player: Player::new(map_dimensions),
         })
     }
 }

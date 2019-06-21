@@ -13,10 +13,12 @@ pub struct Player {
     tile: Rect,
     animation: Vec<(u32, Rect)>,
     animations: HashMap<PlayerState, Vec<(u32, Rect)>>,
+    map_height: f32,
+    map_width: f32,
 }
 
 impl Player {
-    pub fn new() -> Player {
+    pub fn new(dimensions: (f32, f32)) -> Player {
         let mut animations = HashMap::new();
 
         let mut idle = Vec::new();
@@ -36,6 +38,8 @@ impl Player {
             tile: Rect::zero(),
             animation: Vec::new(),
             animations,
+            map_width: dimensions.0,
+            map_height: dimensions.1,
         }
     }
 
@@ -76,6 +80,21 @@ impl Player {
             }
             PlayerState::MovingRight => self.position.x += constants::PLAYER_SPEED,
             PlayerState::Idle => (),
+        }
+
+        let pixel_width = constants::TILE_WIDTH * constants::TILE_SCALE;
+        let pixel_height = constants::TILE_HEIGHT * constants::TILE_SCALE;
+
+        if self.position.x < 0.0 {
+            self.position.x = 0.0;
+        } else if self.position.x + pixel_height > self.map_width {
+            self.position.x = self.map_width - pixel_width;
+        }
+
+        if self.position.y < 0.0 {
+            self.position.y = 0.0;
+        } else if self.position.y + pixel_height > self.map_height {
+            self.position.y = self.map_height - pixel_height;
         }
     }
 
@@ -157,12 +176,6 @@ impl Player {
             },
             _ => original_state,
         }
-    }
-}
-
-impl Default for Player {
-    fn default() -> Self {
-        Player::new()
     }
 }
 
