@@ -22,12 +22,12 @@ impl Tileset {
         let mut tiles = Vec::new();
         tiles.push(Rect::zero());
 
+        let w = 1.0 / columns as f32;
+        let h = 1.0 / rows as f32;
         for r in 0..rows {
             for c in 0..columns {
                 let x = c as f32 / columns as f32;
                 let y = r as f32 / rows as f32;
-                let w = (c as f32 + 1.0) / columns as f32;
-                let h = (r as f32 + 1.0) / rows as f32;
                 tiles.push(Rect::new(x, y, w, h));
             }
         }
