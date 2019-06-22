@@ -4,12 +4,14 @@
  <tile id="14">
   <properties>
    <property name="animated" value="flame"/>
+   <property name="delay" type="int" value="100"/>
    <property name="keyframe" type="int" value="0"/>
   </properties>
  </tile>
  <tile id="24">
   <properties>
    <property name="animated" value="flame"/>
+   <property name="delay" type="int" value="100"/>
    <property name="keyframe" type="int" value="1"/>
   </properties>
  </tile>
