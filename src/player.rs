@@ -11,8 +11,8 @@ pub struct Player {
     pub position: Point2<f32>,
     state: PlayerState,
     tile: Rect,
-    animation: Vec<(u32, Rect)>,
-    animations: HashMap<PlayerState, Vec<(u32, Rect)>>,
+    animation: Vec<(usize, Rect)>,
+    animations: HashMap<PlayerState, Vec<(usize, Rect)>>,
     map_height: f32,
     map_width: f32,
 }
@@ -106,7 +106,7 @@ impl Player {
 
         let index = match self.animation.iter().position(|a| a.1 == self.tile) {
             Some(index) => {
-                if check_update_time(context, self.animation[index].0) {
+                if check_update_time(context, self.animation[index].0 as u32) {
                     index + 1
                 } else {
                     index

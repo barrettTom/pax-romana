@@ -9,7 +9,7 @@ use crate::tileset::Tileset;
 
 pub struct State {
     map: Map,
-    tileset: Tileset,
+    //tileset: Tileset,
     spritebatch: SpriteBatch,
     camera: Camera,
     player: Player,
@@ -20,12 +20,14 @@ impl State {
         let mut image = Image::new(context, "/tileset.png")?;
         image.set_filter(FilterMode::Nearest);
 
-        let map = Map::new(filesystem::open(context, "/map.tmx")?);
+        let tileset = Tileset::new(filesystem::open(context, "/tileset.tsx")?);
+
+        let map = Map::new(filesystem::open(context, "/map.tmx")?, &tileset);
         let map_dimensions = map.get_dimensions();
 
         Ok(State {
             map,
-            tileset: Tileset::new(filesystem::open(context, "/tileset.tsx")?),
+            //    tileset,
             spritebatch: SpriteBatch::new(image),
             camera: Camera::new(context, map_dimensions),
             player: Player::new(map_dimensions),
@@ -43,7 +45,7 @@ impl EventHandler for State {
     fn draw(&mut self, context: &mut Context) -> GameResult {
         graphics::clear(context, graphics::BLACK);
 
-        self.map.draw(&mut self.spritebatch, &self.tileset);
+        self.map.draw(&mut self.spritebatch);
         self.player.draw(&mut self.spritebatch);
 
         graphics::draw(
