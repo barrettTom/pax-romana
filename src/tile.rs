@@ -6,32 +6,36 @@ use crate::math::convert_angle_to_rad;
 use crate::tileset::Tileset;
 
 pub struct Tile {
-    //id: u32,
     source: Rect,
     //animation: Option<Vec<(u32, Rect)>>,
-    rotate: f32,
     destination: Point2<f32>,
+    rotation: f32,
 }
 
 impl Tile {
     pub fn new(text: &str, i: usize, tileset: &Tileset, width: usize, height: usize) -> Tile {
         let id = text.parse::<usize>().unwrap();
 
-        //let flip_d = (id & constants::FLIP_DIAGONAL_FLAG) == constants::FLIP_DIAGONAL_FLAG;
+        let flip_d = (id & constants::FLIP_DIAGONAL_FLAG) == constants::FLIP_DIAGONAL_FLAG;
         let flip_h = (id & constants::FLIP_HORIZONTAL_FLAG) == constants::FLIP_HORIZONTAL_FLAG;
         let flip_v = (id & constants::FLIP_VERTICAL_FLAG) == constants::FLIP_VERTICAL_FLAG;
 
-        let id = if flip_h | flip_v {
+        let id = if flip_h | flip_v | flip_d {
             id & !constants::ALL_FLIP_FLAGS
         } else {
             id
         };
 
-        let rotate = match (flip_h, flip_v) {
-            (true, false) => convert_angle_to_rad(90.0),
-            (true, true) => convert_angle_to_rad(180.0),
-            (false, true) => convert_angle_to_rad(270.0),
-            (false, false) => 0.0,
+        let (source, rotation) = match (flip_d, flip_h, flip_v) {
+            (true, true, true) => (Tile::flip(tileset.tiles[id]), convert_angle_to_rad(90.0)),
+            (true, true, false) => (tileset.tiles[id], convert_angle_to_rad(90.0)),
+            (true, false, true) => (tileset.tiles[id], convert_angle_to_rad(270.0)),
+            //(true, false, false) => (),
+            (false, true, true) => (tileset.tiles[id], convert_angle_to_rad(180.0)),
+            (false, true, false) => (Tile::flip(tileset.tiles[id]), 0.0),
+            //(false, false, true) => (),
+            //(false, false, false) => (),
+            _ => (tileset.tiles[id], 0.0),
         };
 
         let x = i as f32 % width as f32;
@@ -44,20 +48,26 @@ impl Tile {
         );
 
         Tile {
-            //id,
-            source: tileset.tiles[id as usize],
+            source,
             //animation: None,
-            rotate,
             destination,
+            rotation,
         }
+    }
+
+    fn flip(rect: Rect) -> Rect {
+        let mut r = rect;
+        r.x *= -1.0;
+        r.x -= rect.w;
+        r
     }
 
     pub fn draw(&self, spritebatch: &mut SpriteBatch) {
         let draw_param = DrawParam::default()
             .src(self.source)
-            .rotation(self.rotate)
-            .offset(Point2::new(0.5, 0.5))
             .dest(self.destination)
+            .offset(Point2::new(0.5, 0.5))
+            .rotation(self.rotation)
             .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE));
 
         spritebatch.add(draw_param);

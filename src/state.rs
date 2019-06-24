@@ -1,5 +1,5 @@
 use ggez::event::{EventHandler, KeyCode, KeyMods};
-use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Image};
+use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Image, WrapMode};
 use ggez::{filesystem, Context, GameResult};
 
 use crate::camera::Camera;
@@ -9,7 +9,6 @@ use crate::tileset::Tileset;
 
 pub struct State {
     map: Map,
-    //tileset: Tileset,
     spritebatch: SpriteBatch,
     camera: Camera,
     player: Player,
@@ -19,6 +18,7 @@ impl State {
     pub fn new(context: &mut Context) -> GameResult<State> {
         let mut image = Image::new(context, "/tileset.png")?;
         image.set_filter(FilterMode::Nearest);
+        image.set_wrap(WrapMode::Mirror, WrapMode::Mirror);
 
         let tileset = Tileset::new(filesystem::open(context, "/tileset.tsx")?);
 
@@ -27,7 +27,6 @@ impl State {
 
         Ok(State {
             map,
-            //    tileset,
             spritebatch: SpriteBatch::new(image),
             camera: Camera::new(context, map_dimensions),
             player: Player::new(map_dimensions),
