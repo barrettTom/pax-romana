@@ -3,7 +3,7 @@ use ggez::graphics::Rect;
 use std::collections::HashMap;
 
 use crate::constants;
-use crate::xmlelements::{XMLElements, Property};
+use crate::xmlelements::{Property, XMLElements};
 
 pub struct Tileset {
     tiles: HashMap<usize, Rect>,
@@ -45,7 +45,10 @@ impl Tileset {
         let mut properties = HashMap::new();
 
         for tile_element in elements.get_elements("tile") {
-            let tile_id = XMLElements::get_attribute(&tile_element, "id").unwrap().parse().unwrap();
+            let tile_id = XMLElements::get_attribute(&tile_element, "id")
+                .unwrap()
+                .parse()
+                .unwrap();
 
             let property_elements = elements.get_children(&tile_element, "property");
 

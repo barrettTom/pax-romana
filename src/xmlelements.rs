@@ -14,11 +14,18 @@ pub struct Property {
 
 impl Property {
     pub fn new(property_elements: Vec<XmlEvent>) -> Property {
-
-        let entity = XMLElements::get_attribute_value(&property_elements, "entity").unwrap().parse().unwrap();
-        let keyframe =
-            XMLElements::get_attribute_value(&property_elements, "keyframe").unwrap().parse().unwrap();
-        let delay = XMLElements::get_attribute_value(&property_elements, "delay").unwrap().parse().unwrap();
+        let entity = XMLElements::get_attribute_value(&property_elements, "entity")
+            .unwrap()
+            .parse()
+            .unwrap();
+        let keyframe = XMLElements::get_attribute_value(&property_elements, "keyframe")
+            .unwrap()
+            .parse()
+            .unwrap();
+        let delay = XMLElements::get_attribute_value(&property_elements, "delay")
+            .unwrap()
+            .parse()
+            .unwrap();
 
         Property {
             entity,
@@ -126,18 +133,12 @@ impl XMLElements {
         }
     }
 
-    pub fn get_attribute_value(
-        elements: &Vec<XmlEvent>,
-        attribute_name: &str,
-    ) -> Result<String, ()> {
+    pub fn get_attribute_value(elements: &[XmlEvent], attribute_name: &str) -> Result<String, ()> {
         let element = elements
             .iter()
             .find(|e| {
                 if let StartElement { attributes, .. } = e {
-                    attributes
-                        .iter()
-                        .find(|a| a.value == attribute_name)
-                        .is_some()
+                    attributes.iter().any(|a| a.value == attribute_name)
                 } else {
                     false
                 }
