@@ -27,15 +27,15 @@ impl Tile {
         };
 
         let (source, rotation) = match (flip_d, flip_h, flip_v) {
-            (true, true, true) => (Tile::flip(tileset.tiles[id]), convert_angle_to_rad(90.0)),
-            (true, true, false) => (tileset.tiles[id], convert_angle_to_rad(90.0)),
-            (true, false, true) => (tileset.tiles[id], convert_angle_to_rad(270.0)),
+            (true, true, true) => (Tile::flip(tileset.get(id)), convert_angle_to_rad(90.0)),
+            (true, true, false) => (tileset.get(id), convert_angle_to_rad(90.0)),
+            (true, false, true) => (tileset.get(id), convert_angle_to_rad(270.0)),
             //(true, false, false) => (),
-            (false, true, true) => (tileset.tiles[id], convert_angle_to_rad(180.0)),
-            (false, true, false) => (Tile::flip(tileset.tiles[id]), 0.0),
+            (false, true, true) => (tileset.get(id), convert_angle_to_rad(180.0)),
+            (false, true, false) => (Tile::flip(tileset.get(id)), 0.0),
             //(false, false, true) => (),
             //(false, false, false) => (),
-            _ => (tileset.tiles[id], 0.0),
+            _ => (tileset.get(id), 0.0),
         };
 
         let x = i as f32 % width as f32;

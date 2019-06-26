@@ -17,8 +17,16 @@ impl Map {
     pub fn new(file: File, tileset: &Tileset) -> Map {
         let elements = XMLElements::new(file);
 
-        let width = elements.get_element_attribute("map", "width").unwrap();
-        let height = elements.get_element_attribute("map", "height").unwrap();
+        let width = elements
+            .get_element_attribute("map", "width")
+            .unwrap()
+            .parse()
+            .unwrap();
+        let height = elements
+            .get_element_attribute("map", "height")
+            .unwrap()
+            .parse()
+            .unwrap();
 
         let layers = elements
             .events
