@@ -1,37 +1,87 @@
 use ggez::filesystem::File;
 use ggez::graphics::Rect;
+use std::collections::HashMap;
 
 use crate::constants;
-use crate::xmlelements::XMLElements;
+use crate::xmlelements::{Property, XMLElements};
 
 pub struct Tileset {
-    pub tiles: Vec<Rect>,
+    tiles: HashMap<usize, Rect>,
+    properties: HashMap<usize, Property>,
 }
 
 impl Tileset {
     pub fn new(file: File) -> Tileset {
         let elements = XMLElements::new(file);
 
-        let height = elements.get_element_attribute("image", "height").unwrap();
+        let height = elements
+            .get_element_attribute("image", "height")
+            .unwrap()
+            .parse::<usize>()
+            .unwrap();
         let columns = elements
             .get_element_attribute("tileset", "columns")
+            .unwrap()
+            .parse::<usize>()
             .unwrap();
 
         let rows = height / (constants::TILE_HEIGHT as usize);
 
-        let mut tiles = Vec::new();
-        tiles.push(Rect::zero());
+        let mut tiles = HashMap::new();
+        tiles.insert(0, Rect::zero());
 
         let w = 1.0 / columns as f32;
         let h = 1.0 / rows as f32;
+        let mut key = 1;
         for r in 0..rows {
             for c in 0..columns {
                 let x = c as f32 / columns as f32;
                 let y = r as f32 / rows as f32;
-                tiles.push(Rect::new(x, y, w, h));
+                tiles.insert(key, Rect::new(x, y, w, h));
+                key += 1;
             }
         }
 
-        Tileset { tiles }
+        let mut properties = HashMap::new();
+
+        for tile_element in elements.get_elements("tile") {
+            let tile_id = XMLElements::get_attribute(&tile_element, "id")
+                .unwrap()
+                .parse::<usize>()
+                .unwrap();
+
+            let property_elements = elements.get_children(&tile_element, "property");
+
+            properties.insert(tile_id + 1, Property::new(property_elements));
+        }
+
+        Tileset { tiles, properties }
+    }
+
+    pub fn get(&self, id: usize) -> Rect {
+        *self.tiles.get(&id).unwrap()
+    }
+
+    pub fn get_animations(&self, id: usize) -> Option<Vec<(usize, Rect)>> {
+        if let Some(property) = self.properties.get(&id) {
+            let entitys_properties: HashMap<usize, Property> = self
+                .properties
+                .clone()
+                .into_iter()
+                .filter(|(_, p)| p.entity == property.entity)
+                .collect();
+            Some(
+                entitys_properties
+                    .iter()
+                    .map(|(id, p)| (p.delay, self.get(*id)))
+                    .collect(),
+            )
+        } else {
+            None
+        }
+    }
+
+    pub fn get_property(&self, id: usize) -> Option<&Property> {
+        self.properties.get(&id)
     }
 }

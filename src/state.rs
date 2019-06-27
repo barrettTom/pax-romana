@@ -1,5 +1,5 @@
 use ggez::event::{EventHandler, KeyCode, KeyMods};
-use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Image};
+use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Image, WrapMode};
 use ggez::{filesystem, Context, GameResult};
 
 use crate::camera::Camera;
@@ -9,7 +9,6 @@ use crate::tileset::Tileset;
 
 pub struct State {
     map: Map,
-    tileset: Tileset,
     spritebatch: SpriteBatch,
     camera: Camera,
     player: Player,
@@ -19,13 +18,15 @@ impl State {
     pub fn new(context: &mut Context) -> GameResult<State> {
         let mut image = Image::new(context, "/tileset.png")?;
         image.set_filter(FilterMode::Nearest);
+        image.set_wrap(WrapMode::Mirror, WrapMode::Mirror);
 
-        let map = Map::new(filesystem::open(context, "/map.tmx")?);
+        let tileset = Tileset::new(filesystem::open(context, "/tileset.tsx")?);
+
+        let map = Map::new(filesystem::open(context, "/map.tmx")?, &tileset);
         let map_dimensions = map.get_dimensions();
 
         Ok(State {
             map,
-            tileset: Tileset::new(filesystem::open(context, "/tileset.tsx")?),
             spritebatch: SpriteBatch::new(image),
             camera: Camera::new(context, map_dimensions),
             player: Player::new(map_dimensions),
@@ -35,6 +36,7 @@ impl State {
 
 impl EventHandler for State {
     fn update(&mut self, context: &mut Context) -> GameResult {
+        self.map.update();
         self.player.update(context);
         self.camera.give_center(self.player.position);
         Ok(())
@@ -43,7 +45,7 @@ impl EventHandler for State {
     fn draw(&mut self, context: &mut Context) -> GameResult {
         graphics::clear(context, graphics::BLACK);
 
-        self.map.draw(&mut self.spritebatch, &self.tileset);
+        self.map.draw(&mut self.spritebatch);
         self.player.draw(&mut self.spritebatch);
 
         graphics::draw(
