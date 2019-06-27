@@ -1,5 +1,6 @@
 use ggez::graphics::{spritebatch::SpriteBatch, DrawParam, Rect};
 use ggez::nalgebra::{Point2, Vector2};
+use std::time::Instant;
 
 use crate::constants;
 use crate::math::convert_angle_to_rad;
@@ -7,7 +8,8 @@ use crate::tileset::Tileset;
 
 pub struct Tile {
     source: Rect,
-    //animation: Option<Vec<(u32, Rect)>>,
+    animations: Option<Vec<(usize, Rect)>>,
+    timer: Instant,
     destination: Point2<f32>,
     rotation: f32,
 }
@@ -49,7 +51,8 @@ impl Tile {
 
         Tile {
             source,
-            //animation: None,
+            animations: tileset.get_animations(id),
+            timer: Instant::now(),
             destination,
             rotation,
         }
@@ -60,6 +63,17 @@ impl Tile {
         r.x *= -1.0;
         r.x -= rect.w;
         r
+    }
+
+    pub fn update(&mut self) {
+        if let Some(animations) = &self.animations {
+            let mut i = animations.iter().position(|a| a.1 == self.source).unwrap();
+            if self.timer.elapsed().as_millis() > animations[i].0 as u128 {
+                i = if i == animations.len() - 1 { 0 } else { i + 1 };
+                self.source = animations[i].1;
+                self.timer = Instant::now()
+            }
+        }
     }
 
     pub fn draw(&self, spritebatch: &mut SpriteBatch) {

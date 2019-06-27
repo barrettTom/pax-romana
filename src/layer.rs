@@ -23,6 +23,12 @@ impl Layer {
         }
     }
 
+    pub fn update(&mut self) {
+        for tile in self.tiles.iter_mut() {
+            tile.update();
+        }
+    }
+
     pub fn draw(&self, spritebatch: &mut SpriteBatch) {
         for tile in self.tiles.iter() {
             tile.draw(spritebatch);

@@ -47,12 +47,12 @@ impl Tileset {
         for tile_element in elements.get_elements("tile") {
             let tile_id = XMLElements::get_attribute(&tile_element, "id")
                 .unwrap()
-                .parse()
+                .parse::<usize>()
                 .unwrap();
 
             let property_elements = elements.get_children(&tile_element, "property");
 
-            properties.insert(tile_id, Property::new(property_elements));
+            properties.insert(tile_id + 1, Property::new(property_elements));
         }
 
         Tileset { tiles, properties }
@@ -60,5 +60,28 @@ impl Tileset {
 
     pub fn get(&self, id: usize) -> Rect {
         *self.tiles.get(&id).unwrap()
+    }
+
+    pub fn get_animations(&self, id: usize) -> Option<Vec<(usize, Rect)>> {
+        if let Some(property) = self.properties.get(&id) {
+            let entitys_properties: HashMap<usize, Property> = self
+                .properties
+                .clone()
+                .into_iter()
+                .filter(|(_, p)| p.entity == property.entity)
+                .collect();
+            Some(
+                entitys_properties
+                    .iter()
+                    .map(|(id, p)| (p.delay, self.get(*id)))
+                    .collect(),
+            )
+        } else {
+            None
+        }
+    }
+
+    pub fn get_property(&self, id: usize) -> Option<&Property> {
+        self.properties.get(&id)
     }
 }

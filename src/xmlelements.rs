@@ -5,11 +5,11 @@ use xml::reader::{
     XmlEvent::{self, EndElement, StartElement},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Property {
-    entity: String,
-    keyframe: usize,
-    delay: usize,
+    pub entity: String,
+    pub keyframe: usize,
+    pub delay: usize,
 }
 
 impl Property {

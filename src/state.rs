@@ -36,6 +36,7 @@ impl State {
 
 impl EventHandler for State {
     fn update(&mut self, context: &mut Context) -> GameResult {
+        self.map.update();
         self.player.update(context);
         self.camera.give_center(self.player.position);
         Ok(())

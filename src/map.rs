@@ -53,6 +53,12 @@ impl Map {
         }
     }
 
+    pub fn update(&mut self) {
+        for layer in self.layers.iter_mut() {
+            layer.update();
+        }
+    }
+
     pub fn get_dimensions(&self) -> (f32, f32) {
         (
             (constants::TILE_WIDTH * constants::TILE_SCALE) * self.width as f32,
