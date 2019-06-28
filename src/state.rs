@@ -29,15 +29,15 @@ impl State {
             map,
             spritebatch: SpriteBatch::new(image),
             camera: Camera::new(context, map_dimensions),
-            player: Player::new(map_dimensions),
+            player: Player::new(&tileset, map_dimensions),
         })
     }
 }
 
 impl EventHandler for State {
-    fn update(&mut self, context: &mut Context) -> GameResult {
+    fn update(&mut self, _context: &mut Context) -> GameResult {
         self.map.update();
-        self.player.update(context);
+        self.player.update();
         self.camera.give_center(self.player.position);
         Ok(())
     }

@@ -1,42 +1,38 @@
 use ggez::event::KeyCode;
 use ggez::graphics::{spritebatch::SpriteBatch, DrawParam, Rect};
 use ggez::nalgebra::{Point2, Vector2};
-use ggez::timer::check_update_time;
-use ggez::Context;
 use std::collections::HashMap;
+use std::time::Instant;
 
 use crate::constants;
+use crate::math::next_source;
+use crate::tileset::Tileset;
 
 pub struct Player {
     pub position: Point2<f32>,
     state: PlayerState,
-    tile: Rect,
-    animation: Vec<(usize, Rect)>,
+    source: Rect,
+    timer: Instant,
+    animation: Option<Vec<(usize, Rect)>>,
     animations: HashMap<PlayerState, Vec<(usize, Rect)>>,
     map_height: f32,
     map_width: f32,
 }
 
 impl Player {
-    pub fn new(dimensions: (f32, f32)) -> Player {
+    pub fn new(tileset: &Tileset, dimensions: (f32, f32)) -> Player {
         let mut animations = HashMap::new();
 
-        let mut idle = Vec::new();
-        idle.push((1, Rect::new(0.0, 0.0, 0.2, 0.2)));
-        idle.push((1, Rect::new(0.2, 0.0, 0.2, 0.2)));
-
-        let mut moving_right = Vec::new();
-        moving_right.push((1, Rect::new(0.4, 0.0, 0.2, 0.2)));
-        moving_right.push((1, Rect::new(0.6, 0.0, 0.2, 0.2)));
-
-        animations.insert(PlayerState::Idle, idle);
-        animations.insert(PlayerState::MovingRight, moving_right);
+        let mut source = tileset.get_rect_by_entity("player-top");
+        source.h += tileset.get_rect_by_entity("player-bottom").h;
+        animations.insert(PlayerState::Idle, vec![(1, source)]);
 
         Player {
             position: Point2::new(0.0, 0.0),
             state: PlayerState::Idle,
-            tile: Rect::zero(),
-            animation: Vec::new(),
+            source,
+            timer: Instant::now(),
+            animation: None,
             animations,
             map_width: dimensions.0,
             map_height: dimensions.1,
@@ -45,16 +41,20 @@ impl Player {
 
     pub fn draw(&self, spritebatch: &mut SpriteBatch) {
         let draw_param = DrawParam::default()
-            .src(self.tile)
+            .src(self.source)
             .dest(self.position)
             .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE));
 
         spritebatch.add(draw_param);
     }
 
-    pub fn update(&mut self, context: &mut Context) {
+    pub fn update(&mut self) {
         self.move_position();
-        self.find_tile(context);
+
+        self.animation = self.animations.get(&self.state).cloned();
+        let (source, timer) = next_source(self.source, &self.animation, self.timer);
+        self.source = source;
+        self.timer = timer;
     }
 
     fn move_position(&mut self) {
@@ -95,30 +95,6 @@ impl Player {
             self.position.y = 0.0;
         } else if self.position.y + pixel_height > self.map_height {
             self.position.y = self.map_height - pixel_height;
-        }
-    }
-
-    fn find_tile(&mut self, context: &mut Context) {
-        self.animation = match self.animations.get(&self.state) {
-            Some(animation) => animation.to_vec(),
-            None => self.animations.get(&PlayerState::Idle).unwrap().to_vec(),
-        };
-
-        let index = match self.animation.iter().position(|a| a.1 == self.tile) {
-            Some(index) => {
-                if check_update_time(context, self.animation[index].0 as u32) {
-                    index + 1
-                } else {
-                    index
-                }
-            }
-            None => 0,
-        };
-
-        if index == self.animation.len() {
-            self.tile = self.animation[0].1;
-        } else {
-            self.tile = self.animation[index].1;
         }
     }
 

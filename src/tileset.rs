@@ -62,7 +62,7 @@ impl Tileset {
         *self.tiles.get(&id).unwrap()
     }
 
-    pub fn get_animations(&self, id: usize) -> Option<Vec<(usize, Rect)>> {
+    pub fn get_animation(&self, id: usize) -> Option<Vec<(usize, Rect)>> {
         if let Some(property) = self.properties.get(&id) {
             let entitys_properties: HashMap<usize, Property> = self
                 .properties
@@ -81,7 +81,16 @@ impl Tileset {
         }
     }
 
-    pub fn get_property(&self, id: usize) -> Option<&Property> {
-        self.properties.get(&id)
+    pub fn get_rect_by_entity(&self, entity: &str) -> Rect {
+        *self
+            .tiles
+            .get(
+                self.properties
+                    .iter()
+                    .find(|(_, p)| p.entity == entity && 0 == p.keyframe)
+                    .unwrap()
+                    .0,
+            )
+            .unwrap()
     }
 }
