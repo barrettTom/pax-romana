@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::time::Instant;
 
 use crate::constants;
-use crate::math::next_source;
+use crate::math::{flip, next_source};
 use crate::tileset::Tileset;
 
 pub struct Player {
@@ -23,9 +23,35 @@ impl Player {
     pub fn new(tileset: &Tileset, dimensions: (f32, f32)) -> Player {
         let mut animations = HashMap::new();
 
-        let mut source = tileset.get_rect_by_entity("player-top");
-        source.h += tileset.get_rect_by_entity("player-bottom").h;
+        let mut source = tileset.get_tile_by_entity_keyframe("player-top", 0);
+        source.h += tileset.get_tile_by_entity_keyframe("player-bottom", 0).h;
         animations.insert(PlayerState::Idle, vec![(1, source)]);
+
+        let mut moving = tileset.get_tile_by_entity_keyframe("player-top", 1);
+        moving.h += tileset.get_tile_by_entity_keyframe("player-bottom", 1).h;
+
+        animations.insert(PlayerState::MovingLeft, vec![(100, source), (100, moving)]);
+        animations.insert(
+            PlayerState::MovingUpLeft,
+            vec![(100, source), (100, moving)],
+        );
+        animations.insert(
+            PlayerState::MovingDownLeft,
+            vec![(100, source), (100, moving)],
+        );
+
+        source = flip(source);
+        moving = flip(moving);
+
+        animations.insert(PlayerState::MovingRight, vec![(100, source), (100, moving)]);
+        animations.insert(
+            PlayerState::MovingUpRight,
+            vec![(100, source), (100, moving)],
+        );
+        animations.insert(
+            PlayerState::MovingDownRight,
+            vec![(100, source), (100, moving)],
+        );
 
         Player {
             position: Point2::new(0.0, 0.0),

@@ -81,13 +81,13 @@ impl Tileset {
         }
     }
 
-    pub fn get_rect_by_entity(&self, entity: &str) -> Rect {
+    pub fn get_tile_by_entity_keyframe(&self, entity: &str, keyframe: usize) -> Rect {
         *self
             .tiles
             .get(
                 self.properties
                     .iter()
-                    .find(|(_, p)| p.entity == entity && 0 == p.keyframe)
+                    .find(|(_, p)| p.entity == entity && keyframe == p.keyframe)
                     .unwrap()
                     .0,
             )

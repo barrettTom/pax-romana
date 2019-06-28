@@ -3,7 +3,7 @@ use ggez::nalgebra::{Point2, Vector2};
 use std::time::Instant;
 
 use crate::constants;
-use crate::math::{convert_angle_to_rad, next_source};
+use crate::math::{convert_angle_to_rad, flip, next_source};
 use crate::tileset::Tileset;
 
 pub struct Tile {
@@ -29,12 +29,12 @@ impl Tile {
         };
 
         let (source, rotation) = match (flip_d, flip_h, flip_v) {
-            (true, true, true) => (Tile::flip(tileset.get(id)), convert_angle_to_rad(90.0)),
+            (true, true, true) => (flip(tileset.get(id)), convert_angle_to_rad(90.0)),
             (true, true, false) => (tileset.get(id), convert_angle_to_rad(90.0)),
             (true, false, true) => (tileset.get(id), convert_angle_to_rad(270.0)),
             //(true, false, false) => (),
             (false, true, true) => (tileset.get(id), convert_angle_to_rad(180.0)),
-            (false, true, false) => (Tile::flip(tileset.get(id)), 0.0),
+            (false, true, false) => (flip(tileset.get(id)), 0.0),
             //(false, false, true) => (),
             //(false, false, false) => (),
             _ => (tileset.get(id), 0.0),
@@ -56,13 +56,6 @@ impl Tile {
             destination,
             rotation,
         }
-    }
-
-    fn flip(rect: Rect) -> Rect {
-        let mut r = rect;
-        r.x *= -1.0;
-        r.x -= rect.w;
-        r
     }
 
     pub fn update(&mut self) {

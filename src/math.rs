@@ -6,6 +6,13 @@ pub fn convert_angle_to_rad(angle: f32) -> f32 {
     angle * (PI / 180.0)
 }
 
+pub fn flip(rect: Rect) -> Rect {
+    let mut r = rect;
+    r.x *= -1.0;
+    r.x -= rect.w;
+    r
+}
+
 pub fn next_source(
     source: Rect,
     animation: &Option<Vec<(usize, Rect)>>,
@@ -17,6 +24,8 @@ pub fn next_source(
                 i = if i == animation.len() - 1 { 0 } else { i + 1 };
                 return (animation[i].1, Instant::now());
             }
+        } else {
+            return (animation[0].1, Instant::now());
         }
     }
     (source, timer)
