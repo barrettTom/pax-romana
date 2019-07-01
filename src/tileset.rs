@@ -57,6 +57,16 @@ impl Tileset {
             properties.push(Property::new(tile_id, property_elements));
         }
 
+        let invisible: Vec<usize> = properties
+            .iter()
+            .filter(|p| p.visible == Some(false))
+            .map(|p| p.tile_id)
+            .collect();
+
+        for i in invisible {
+            *tiles.get_mut(&i).unwrap() = Rect::zero();
+        }
+
         Tileset { tiles, properties }
     }
 
