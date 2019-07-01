@@ -8,7 +8,7 @@ use crate::tileset::Tileset;
 
 pub struct Tile {
     source: Rect,
-    animation: Option<Vec<(usize, Rect)>>,
+    animation: Vec<(usize, Rect)>,
     timer: Instant,
     destination: Point2<f32>,
     rotation: f32,

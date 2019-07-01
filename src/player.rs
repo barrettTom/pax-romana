@@ -13,7 +13,7 @@ pub struct Player {
     state: PlayerState,
     source: Rect,
     timer: Instant,
-    animation: Option<Vec<(usize, Rect)>>,
+    animation: Vec<(usize, Rect)>,
     animations: HashMap<PlayerState, Vec<(usize, Rect)>>,
     map_height: f32,
     map_width: f32,
@@ -26,7 +26,7 @@ impl Player {
             state: PlayerState::IdleLeft,
             source: Rect::zero(),
             timer: Instant::now(),
-            animation: None,
+            animation: Vec::new(),
             animations: Player::build_animations(tileset),
             map_width: dimensions.0,
             map_height: dimensions.1,
@@ -83,7 +83,11 @@ impl Player {
     pub fn update(&mut self) {
         self.move_position();
 
-        self.animation = self.animations.get(&self.state).cloned();
+        self.animation = self
+            .animations
+            .get(&self.state)
+            .cloned()
+            .unwrap_or_default();
         let (source, timer) = next_source(self.source, &self.animation, self.timer);
         self.source = source;
         self.timer = timer;

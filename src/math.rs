@@ -13,20 +13,17 @@ pub fn flip(rect: Rect) -> Rect {
     r
 }
 
-pub fn next_source(
-    source: Rect,
-    animation: &Option<Vec<(usize, Rect)>>,
-    timer: Instant,
-) -> (Rect, Instant) {
-    if let Some(animation) = animation {
-        if let Some(mut i) = animation.iter().position(|a| a.1 == source) {
-            if timer.elapsed().as_millis() > animation[i].0 as u128 {
-                i = if i == animation.len() - 1 { 0 } else { i + 1 };
-                return (animation[i].1, Instant::now());
-            }
+pub fn next_source(source: Rect, animation: &[(usize, Rect)], timer: Instant) -> (Rect, Instant) {
+    if let Some(mut i) = animation.iter().position(|a| a.1 == source) {
+        if timer.elapsed().as_millis() > animation[i].0 as u128 {
+            i = if i == animation.len() - 1 { 0 } else { i + 1 };
+            (animation[i].1, Instant::now())
         } else {
-            return (animation[0].1, Instant::now());
+            (source, timer)
         }
+    } else if !animation.is_empty() {
+        (animation[0].1, timer)
+    } else {
+        (source, timer)
     }
-    (source, timer)
 }

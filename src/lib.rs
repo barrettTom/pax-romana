@@ -4,6 +4,7 @@ pub mod layer;
 pub mod map;
 pub mod math;
 pub mod player;
+pub mod property;
 pub mod state;
 pub mod tile;
 pub mod tileset;

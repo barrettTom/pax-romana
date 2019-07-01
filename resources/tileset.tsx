@@ -15,6 +15,12 @@
    <property name="keyframe" type="int" value="1"/>
   </properties>
  </tile>
+ <tile id="25">
+  <properties>
+   <property name="spawn" value="peasant"/>
+   <property name="visible" type="bool" value="false"/>
+  </properties>
+ </tile>
  <tile id="34">
   <properties>
    <property name="delay" type="int" value="100"/>

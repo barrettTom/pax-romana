@@ -5,36 +5,6 @@ use xml::reader::{
     XmlEvent::{self, EndElement, StartElement},
 };
 
-#[derive(Debug, Clone)]
-pub struct Property {
-    pub entity: String,
-    pub keyframe: usize,
-    pub delay: usize,
-}
-
-impl Property {
-    pub fn new(property_elements: Vec<XmlEvent>) -> Property {
-        let entity = XMLElements::get_attribute_value(&property_elements, "entity")
-            .unwrap()
-            .parse()
-            .unwrap();
-        let keyframe = XMLElements::get_attribute_value(&property_elements, "keyframe")
-            .unwrap()
-            .parse()
-            .unwrap();
-        let delay = XMLElements::get_attribute_value(&property_elements, "delay")
-            .unwrap()
-            .parse()
-            .unwrap();
-
-        Property {
-            entity,
-            keyframe,
-            delay,
-        }
-    }
-}
-
 pub struct XMLElements {
     pub events: Vec<XmlEvent>,
 }
@@ -143,7 +113,7 @@ impl XMLElements {
                     false
                 }
             })
-            .unwrap();
+            .ok_or(())?;
 
         if let StartElement { attributes, .. } = element {
             Ok(attributes

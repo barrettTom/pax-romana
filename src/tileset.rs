@@ -3,11 +3,12 @@ use ggez::graphics::Rect;
 use std::collections::HashMap;
 
 use crate::constants;
-use crate::xmlelements::{Property, XMLElements};
+use crate::property::Property;
+use crate::xmlelements::XMLElements;
 
 pub struct Tileset {
     tiles: HashMap<usize, Rect>,
-    properties: HashMap<usize, Property>,
+    properties: Vec<Property>,
 }
 
 impl Tileset {
@@ -42,17 +43,18 @@ impl Tileset {
             }
         }
 
-        let mut properties = HashMap::new();
+        let mut properties = Vec::new();
 
         for tile_element in elements.get_elements("tile") {
             let tile_id = XMLElements::get_attribute(&tile_element, "id")
                 .unwrap()
                 .parse::<usize>()
-                .unwrap();
+                .unwrap()
+                + 1;
 
             let property_elements = elements.get_children(&tile_element, "property");
 
-            properties.insert(tile_id + 1, Property::new(property_elements));
+            properties.push(Property::new(tile_id, property_elements));
         }
 
         Tileset { tiles, properties }
@@ -62,22 +64,16 @@ impl Tileset {
         *self.tiles.get(&id).unwrap()
     }
 
-    pub fn get_animation(&self, id: usize) -> Option<Vec<(usize, Rect)>> {
-        if let Some(property) = self.properties.get(&id) {
-            let entitys_properties: HashMap<usize, Property> = self
-                .properties
+    pub fn get_animation(&self, tile_id: usize) -> Vec<(usize, Rect)> {
+        if let Some(property) = self.properties.iter().find(|p| p.tile_id == tile_id) {
+            self.properties
                 .clone()
                 .into_iter()
-                .filter(|(_, p)| p.entity == property.entity)
-                .collect();
-            Some(
-                entitys_properties
-                    .iter()
-                    .map(|(id, p)| (p.delay, self.get(*id)))
-                    .collect(),
-            )
+                .filter(|p| p.entity == property.entity && p.entity.is_some())
+                .map(|p| (p.delay.unwrap(), self.get(p.tile_id)))
+                .collect()
         } else {
-            None
+            Vec::new()
         }
     }
 
@@ -85,11 +81,12 @@ impl Tileset {
         *self
             .tiles
             .get(
-                self.properties
+                &self
+                    .properties
                     .iter()
-                    .find(|(_, p)| p.entity == entity && keyframe == p.keyframe)
+                    .find(|p| p.entity == Some(entity.to_string()) && Some(keyframe) == p.keyframe)
                     .unwrap()
-                    .0,
+                    .tile_id,
             )
             .unwrap()
     }
