@@ -21,11 +21,24 @@ pub struct Player {
 
 impl Player {
     pub fn new(tileset: &Tileset, dimensions: (f32, f32)) -> Player {
+        Player {
+            position: Point2::new(0.0, 0.0),
+            state: PlayerState::IdleLeft,
+            source: Rect::zero(),
+            timer: Instant::now(),
+            animation: None,
+            animations: Player::build_animations(tileset),
+            map_width: dimensions.0,
+            map_height: dimensions.1,
+        }
+    }
+
+    fn build_animations(tileset: &Tileset) -> HashMap<PlayerState, Vec<(usize, Rect)>> {
         let mut animations = HashMap::new();
 
         let mut source = tileset.get_tile_by_entity_keyframe("player-top", 0);
         source.h += tileset.get_tile_by_entity_keyframe("player-bottom", 0).h;
-        animations.insert(PlayerState::Idle, vec![(1, source)]);
+        animations.insert(PlayerState::IdleLeft, vec![(1, source)]);
 
         let mut moving = tileset.get_tile_by_entity_keyframe("player-top", 1);
         moving.h += tileset.get_tile_by_entity_keyframe("player-bottom", 1).h;
@@ -43,6 +56,8 @@ impl Player {
         source = flip(source);
         moving = flip(moving);
 
+        animations.insert(PlayerState::IdleRight, vec![(1, source)]);
+
         animations.insert(PlayerState::MovingRight, vec![(100, source), (100, moving)]);
         animations.insert(
             PlayerState::MovingUpRight,
@@ -53,16 +68,7 @@ impl Player {
             vec![(100, source), (100, moving)],
         );
 
-        Player {
-            position: Point2::new(0.0, 0.0),
-            state: PlayerState::Idle,
-            source,
-            timer: Instant::now(),
-            animation: None,
-            animations,
-            map_width: dimensions.0,
-            map_height: dimensions.1,
-        }
+        animations
     }
 
     pub fn draw(&self, spritebatch: &mut SpriteBatch) {
@@ -105,7 +111,7 @@ impl Player {
                 self.position.y += constants::PLAYER_SPEED / 2.0_f32.sqrt();
             }
             PlayerState::MovingRight => self.position.x += constants::PLAYER_SPEED,
-            PlayerState::Idle => (),
+            PlayerState::IdleLeft | PlayerState::IdleRight => (),
         }
 
         let pixel_width = constants::TILE_WIDTH * constants::TILE_SCALE;
@@ -159,22 +165,22 @@ impl Player {
             KeyCode::W => match original_state {
                 PlayerState::MovingUpLeft => PlayerState::MovingLeft,
                 PlayerState::MovingUpRight => PlayerState::MovingRight,
-                _ => PlayerState::Idle,
+                _ => PlayerState::IdleLeft,
             },
             KeyCode::A => match original_state {
                 PlayerState::MovingUpLeft => PlayerState::MovingUp,
                 PlayerState::MovingDownLeft => PlayerState::MovingDown,
-                _ => PlayerState::Idle,
+                _ => PlayerState::IdleLeft,
             },
             KeyCode::S => match original_state {
                 PlayerState::MovingDownLeft => PlayerState::MovingLeft,
                 PlayerState::MovingDownRight => PlayerState::MovingRight,
-                _ => PlayerState::Idle,
+                _ => PlayerState::IdleRight,
             },
             KeyCode::D => match original_state {
                 PlayerState::MovingUpRight => PlayerState::MovingUp,
                 PlayerState::MovingDownRight => PlayerState::MovingDown,
-                _ => PlayerState::Idle,
+                _ => PlayerState::IdleRight,
             },
             _ => original_state,
         }
@@ -183,7 +189,8 @@ impl Player {
 
 #[derive(Clone, Hash, Eq, PartialEq)]
 enum PlayerState {
-    Idle,
+    IdleLeft,
+    IdleRight,
     MovingUp,
     MovingDown,
     MovingLeft,
