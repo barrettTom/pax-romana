@@ -41,6 +41,9 @@ impl EventHandler for State {
     fn update(&mut self, _context: &mut Context) -> GameResult {
         self.map.update();
         self.player.update();
+        for entity in self.entities.iter_mut() {
+            entity.update();
+        }
         self.camera.give_center(self.player.position);
         Ok(())
     }

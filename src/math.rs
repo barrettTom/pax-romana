@@ -1,4 +1,6 @@
 use ggez::graphics::Rect;
+use ggez::nalgebra::Point2;
+use rand::Rng;
 use std::f32::consts::PI;
 use std::time::Instant;
 
@@ -26,4 +28,10 @@ pub fn next_source(source: Rect, animation: &[(usize, Rect)], timer: Instant) ->
     } else {
         (source, timer)
     }
+}
+
+pub fn random_nearby_point(origin: Point2<f32>, within_radius: f32) -> Point2<f32> {
+    let w = within_radius * rand::thread_rng().gen_range(0.0, 1.0);
+    let t = 2.0 * PI * rand::thread_rng().gen_range(0.0, 1.0);
+    Point2::new(origin.x + w * t.cos(), origin.y + w * t.sin())
 }

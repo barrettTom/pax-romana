@@ -10,11 +10,11 @@ use crate::tileset::Tileset;
 
 pub struct Player {
     pub position: Point2<f32>,
-    state: PlayerState,
+    state: AnimationState,
     source: Rect,
     timer: Instant,
     animation: Vec<(usize, Rect)>,
-    animations: HashMap<PlayerState, Vec<(usize, Rect)>>,
+    animations: HashMap<AnimationState, Vec<(usize, Rect)>>,
     map_height: f32,
     map_width: f32,
 }
@@ -23,7 +23,7 @@ impl Player {
     pub fn new(tileset: &Tileset, dimensions: (f32, f32)) -> Player {
         Player {
             position: Point2::new(0.0, 0.0),
-            state: PlayerState::IdleLeft,
+            state: AnimationState::IdleLeft,
             source: Rect::zero(),
             timer: Instant::now(),
             animation: Vec::new(),
@@ -33,38 +33,38 @@ impl Player {
         }
     }
 
-    fn build_animations(tileset: &Tileset) -> HashMap<PlayerState, Vec<(usize, Rect)>> {
+    fn build_animations(tileset: &Tileset) -> HashMap<AnimationState, Vec<(usize, Rect)>> {
         let mut animations = HashMap::new();
 
         let mut source = tileset.get_tile_by_entity_keyframe("player-top", 0);
         source.h += tileset.get_tile_by_entity_keyframe("player-bottom", 0).h;
-        animations.insert(PlayerState::IdleLeft, vec![(1, source)]);
+        animations.insert(AnimationState::IdleLeft, vec![(1, source)]);
 
         let mut moving = tileset.get_tile_by_entity_keyframe("player-top", 1);
         moving.h += tileset.get_tile_by_entity_keyframe("player-bottom", 1).h;
 
-        animations.insert(PlayerState::MovingLeft, vec![(100, source), (100, moving)]);
+        animations.insert(AnimationState::MovingLeft, vec![(100, source), (100, moving)]);
         animations.insert(
-            PlayerState::MovingUpLeft,
+            AnimationState::MovingUpLeft,
             vec![(100, source), (100, moving)],
         );
         animations.insert(
-            PlayerState::MovingDownLeft,
+            AnimationState::MovingDownLeft,
             vec![(100, source), (100, moving)],
         );
 
         source = flip(source);
         moving = flip(moving);
 
-        animations.insert(PlayerState::IdleRight, vec![(1, source)]);
+        animations.insert(AnimationState::IdleRight, vec![(1, source)]);
 
-        animations.insert(PlayerState::MovingRight, vec![(100, source), (100, moving)]);
+        animations.insert(AnimationState::MovingRight, vec![(100, source), (100, moving)]);
         animations.insert(
-            PlayerState::MovingUpRight,
+            AnimationState::MovingUpRight,
             vec![(100, source), (100, moving)],
         );
         animations.insert(
-            PlayerState::MovingDownRight,
+            AnimationState::MovingDownRight,
             vec![(100, source), (100, moving)],
         );
 
@@ -95,27 +95,27 @@ impl Player {
 
     fn move_position(&mut self) {
         match self.state {
-            PlayerState::MovingUp => self.position.y -= constants::PLAYER_SPEED,
-            PlayerState::MovingUpLeft => {
+            AnimationState::MovingUp => self.position.y -= constants::PLAYER_SPEED,
+            AnimationState::MovingUpLeft => {
                 self.position.x -= constants::PLAYER_SPEED / 2.0_f32.sqrt();
                 self.position.y -= constants::PLAYER_SPEED / 2.0_f32.sqrt();
             }
-            PlayerState::MovingUpRight => {
+            AnimationState::MovingUpRight => {
                 self.position.x += constants::PLAYER_SPEED / 2.0_f32.sqrt();
                 self.position.y -= constants::PLAYER_SPEED / 2.0_f32.sqrt();
             }
-            PlayerState::MovingLeft => self.position.x -= constants::PLAYER_SPEED,
-            PlayerState::MovingDown => self.position.y += constants::PLAYER_SPEED,
-            PlayerState::MovingDownLeft => {
+            AnimationState::MovingLeft => self.position.x -= constants::PLAYER_SPEED,
+            AnimationState::MovingDown => self.position.y += constants::PLAYER_SPEED,
+            AnimationState::MovingDownLeft => {
                 self.position.x -= constants::PLAYER_SPEED / 2.0_f32.sqrt();
                 self.position.y += constants::PLAYER_SPEED / 2.0_f32.sqrt();
             }
-            PlayerState::MovingDownRight => {
+            AnimationState::MovingDownRight => {
                 self.position.x += constants::PLAYER_SPEED / 2.0_f32.sqrt();
                 self.position.y += constants::PLAYER_SPEED / 2.0_f32.sqrt();
             }
-            PlayerState::MovingRight => self.position.x += constants::PLAYER_SPEED,
-            PlayerState::IdleLeft | PlayerState::IdleRight => (),
+            AnimationState::MovingRight => self.position.x += constants::PLAYER_SPEED,
+            AnimationState::IdleLeft | AnimationState::IdleRight => (),
         }
 
         let pixel_width = constants::TILE_WIDTH * constants::TILE_SCALE;
@@ -139,24 +139,24 @@ impl Player {
 
         self.state = match keycode {
             KeyCode::W => match original_state {
-                PlayerState::MovingLeft => PlayerState::MovingUpLeft,
-                PlayerState::MovingRight => PlayerState::MovingUpRight,
-                _ => PlayerState::MovingUp,
+                AnimationState::MovingLeft => AnimationState::MovingUpLeft,
+                AnimationState::MovingRight => AnimationState::MovingUpRight,
+                _ => AnimationState::MovingUp,
             },
             KeyCode::A => match original_state {
-                PlayerState::MovingUp => PlayerState::MovingUpLeft,
-                PlayerState::MovingDown => PlayerState::MovingDownLeft,
-                _ => PlayerState::MovingLeft,
+                AnimationState::MovingUp => AnimationState::MovingUpLeft,
+                AnimationState::MovingDown => AnimationState::MovingDownLeft,
+                _ => AnimationState::MovingLeft,
             },
             KeyCode::S => match original_state {
-                PlayerState::MovingLeft => PlayerState::MovingDownLeft,
-                PlayerState::MovingRight => PlayerState::MovingDownRight,
-                _ => PlayerState::MovingDown,
+                AnimationState::MovingLeft => AnimationState::MovingDownLeft,
+                AnimationState::MovingRight => AnimationState::MovingDownRight,
+                _ => AnimationState::MovingDown,
             },
             KeyCode::D => match original_state {
-                PlayerState::MovingUp => PlayerState::MovingUpRight,
-                PlayerState::MovingDown => PlayerState::MovingDownRight,
-                _ => PlayerState::MovingRight,
+                AnimationState::MovingUp => AnimationState::MovingUpRight,
+                AnimationState::MovingDown => AnimationState::MovingDownRight,
+                _ => AnimationState::MovingRight,
             },
             _ => original_state,
         }
@@ -167,24 +167,24 @@ impl Player {
 
         self.state = match keycode {
             KeyCode::W => match original_state {
-                PlayerState::MovingUpLeft => PlayerState::MovingLeft,
-                PlayerState::MovingUpRight => PlayerState::MovingRight,
-                _ => PlayerState::IdleLeft,
+                AnimationState::MovingUpLeft => AnimationState::MovingLeft,
+                AnimationState::MovingUpRight => AnimationState::MovingRight,
+                _ => AnimationState::IdleLeft,
             },
             KeyCode::A => match original_state {
-                PlayerState::MovingUpLeft => PlayerState::MovingUp,
-                PlayerState::MovingDownLeft => PlayerState::MovingDown,
-                _ => PlayerState::IdleLeft,
+                AnimationState::MovingUpLeft => AnimationState::MovingUp,
+                AnimationState::MovingDownLeft => AnimationState::MovingDown,
+                _ => AnimationState::IdleLeft,
             },
             KeyCode::S => match original_state {
-                PlayerState::MovingDownLeft => PlayerState::MovingLeft,
-                PlayerState::MovingDownRight => PlayerState::MovingRight,
-                _ => PlayerState::IdleRight,
+                AnimationState::MovingDownLeft => AnimationState::MovingLeft,
+                AnimationState::MovingDownRight => AnimationState::MovingRight,
+                _ => AnimationState::IdleRight,
             },
             KeyCode::D => match original_state {
-                PlayerState::MovingUpRight => PlayerState::MovingUp,
-                PlayerState::MovingDownRight => PlayerState::MovingDown,
-                _ => PlayerState::IdleRight,
+                AnimationState::MovingUpRight => AnimationState::MovingUp,
+                AnimationState::MovingDownRight => AnimationState::MovingDown,
+                _ => AnimationState::IdleRight,
             },
             _ => original_state,
         }
@@ -192,7 +192,7 @@ impl Player {
 }
 
 #[derive(Clone, Hash, Eq, PartialEq)]
-enum PlayerState {
+enum AnimationState {
     IdleLeft,
     IdleRight,
     MovingUp,
