@@ -3,6 +3,7 @@ use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Imag
 use ggez::{filesystem, Context, GameResult};
 
 use crate::camera::Camera;
+use crate::entity::Entity;
 use crate::map::Map;
 use crate::player::Player;
 use crate::tileset::Tileset;
@@ -12,6 +13,7 @@ pub struct State {
     spritebatch: SpriteBatch,
     camera: Camera,
     player: Player,
+    entities: Vec<Entity>,
 }
 
 impl State {
@@ -26,10 +28,11 @@ impl State {
         let map_dimensions = map.get_dimensions();
 
         Ok(State {
-            map,
+            map: map.clone(),
             spritebatch: SpriteBatch::new(image),
             camera: Camera::new(context, map_dimensions),
             player: Player::new(&tileset, map_dimensions),
+            entities: Entity::build_entities(&tileset, &map),
         })
     }
 }
@@ -47,6 +50,10 @@ impl EventHandler for State {
 
         self.map.draw(&mut self.spritebatch);
         self.player.draw(&mut self.spritebatch);
+
+        for entity in &self.entities {
+            entity.draw(&mut self.spritebatch);
+        }
 
         graphics::draw(
             context,

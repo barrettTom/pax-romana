@@ -6,11 +6,13 @@ use crate::constants;
 use crate::math::{convert_angle_to_rad, flip, next_source};
 use crate::tileset::Tileset;
 
+#[derive(Clone, Debug)]
 pub struct Tile {
+    pub id: usize,
     source: Rect,
     animation: Vec<(usize, Rect)>,
     timer: Instant,
-    destination: Point2<f32>,
+    pub destination: Point2<f32>,
     rotation: f32,
 }
 
@@ -50,6 +52,7 @@ impl Tile {
         );
 
         Tile {
+            id,
             source,
             animation: tileset.get_animation(id),
             timer: Instant::now(),

@@ -74,6 +74,15 @@ impl Tileset {
         *self.tiles.get(&id).unwrap()
     }
 
+    pub fn get_spawn_tiles(&self) -> Vec<(String, usize)> {
+        self.properties
+            .clone()
+            .into_iter()
+            .filter(|p| p.spawn.is_some())
+            .map(|p| (p.spawn.unwrap(), p.tile_id))
+            .collect()
+    }
+
     pub fn get_animation(&self, tile_id: usize) -> Vec<(usize, Rect)> {
         if let Some(property) = self.properties.iter().find(|p| p.tile_id == tile_id) {
             self.properties

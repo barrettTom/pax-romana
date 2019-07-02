@@ -1,5 +1,6 @@
 pub mod camera;
 pub mod constants;
+pub mod entity;
 pub mod layer;
 pub mod map;
 pub mod math;

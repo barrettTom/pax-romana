@@ -3,10 +3,11 @@ use ggez::graphics::spritebatch::SpriteBatch;
 use crate::tile::Tile;
 use crate::tileset::Tileset;
 
+#[derive(Debug, Clone)]
 pub struct Layer {
     pub tiles: Vec<Tile>,
-    pub width: usize,
-    pub height: usize,
+    width: usize,
+    height: usize,
 }
 
 impl Layer {
