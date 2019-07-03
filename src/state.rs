@@ -3,8 +3,9 @@ use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Imag
 use ggez::{filesystem, Context, GameResult};
 
 use crate::camera::Camera;
-use crate::entity::Entity;
+use crate::entity::Operable;
 use crate::map::Map;
+use crate::npc::NPC;
 use crate::player::Player;
 use crate::tileset::Tileset;
 
@@ -13,7 +14,7 @@ pub struct State {
     spritebatch: SpriteBatch,
     camera: Camera,
     player: Player,
-    entities: Vec<Entity>,
+    npcs: Vec<NPC>,
 }
 
 impl State {
@@ -32,7 +33,7 @@ impl State {
             spritebatch: SpriteBatch::new(image),
             camera: Camera::new(context, map_dimensions),
             player: Player::new(&tileset, map_dimensions),
-            entities: Entity::build_entities(&tileset, &map),
+            npcs: NPC::build_npcs(&tileset, &map),
         })
     }
 }
@@ -41,10 +42,11 @@ impl EventHandler for State {
     fn update(&mut self, _context: &mut Context) -> GameResult {
         self.map.update();
         self.player.update();
-        for entity in self.entities.iter_mut() {
-            entity.update();
+        for npc in self.npcs.iter_mut() {
+            npc.update();
         }
-        self.camera.give_center(self.player.position);
+
+        self.camera.give_center(self.player.get_position());
         Ok(())
     }
 
@@ -53,9 +55,8 @@ impl EventHandler for State {
 
         self.map.draw(&mut self.spritebatch);
         self.player.draw(&mut self.spritebatch);
-
-        for entity in &self.entities {
-            entity.draw(&mut self.spritebatch);
+        for npc in self.npcs.iter_mut() {
+            npc.draw(&mut self.spritebatch);
         }
 
         graphics::draw(
