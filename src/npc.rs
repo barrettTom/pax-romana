@@ -1,9 +1,7 @@
-use ggez::graphics::{spritebatch::SpriteBatch, DrawParam};
-use ggez::nalgebra::{/*distance,*/ Point2, Vector2};
-//use std::time::Instant;
+use ggez::graphics::spritebatch::SpriteBatch;
+use ggez::nalgebra::Point2;
 
-use crate::animation::Animations;
-use crate::constants;
+use crate::animations::Animations;
 use crate::entity::{Entity, Operable};
 use crate::map::Map;
 use crate::tileset::Tileset;
@@ -17,12 +15,7 @@ pub struct NPC {
 
 impl Operable for NPC {
     fn draw(&self, spritebatch: &mut SpriteBatch) {
-        spritebatch.add(
-            DrawParam::default()
-                .src(self.animations.current.current.source)
-                .dest(self.entity.position)
-                .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE)),
-        );
+        self.animations.draw(spritebatch, self.entity.position);
     }
 
     fn update(&mut self) {

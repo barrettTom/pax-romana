@@ -1,9 +1,8 @@
 use ggez::event::KeyCode;
-use ggez::graphics::{spritebatch::SpriteBatch, DrawParam};
-use ggez::nalgebra::{Point2, Vector2};
+use ggez::graphics::spritebatch::SpriteBatch;
+use ggez::nalgebra::Point2;
 
-use crate::animation::Animations;
-use crate::constants;
+use crate::animations::Animations;
 use crate::entity::{Action, Entity, Operable};
 use crate::tileset::Tileset;
 
@@ -14,16 +13,11 @@ pub struct Player {
 
 impl Operable for Player {
     fn draw(&self, spritebatch: &mut SpriteBatch) {
-        spritebatch.add(
-            DrawParam::default()
-                .src(self.animations.current.current.source)
-                .dest(self.entity.position)
-                .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE)),
-        );
+        self.animations.draw(spritebatch, self.get_position());
     }
 
     fn update(&mut self) {
-        self.move_position();
+        self.entity.update();
         self.animations.update(&self.entity.action);
     }
 }
@@ -38,47 +32,6 @@ impl Player {
 
     pub fn get_position(&self) -> Point2<f32> {
         self.entity.position
-    }
-
-    fn move_position(&mut self) {
-        match self.entity.action {
-            Action::MovingUp => self.entity.position.y -= constants::PLAYER_SPEED,
-            Action::MovingUpLeft => {
-                self.entity.position.x -= constants::PLAYER_SPEED / 2.0_f32.sqrt();
-                self.entity.position.y -= constants::PLAYER_SPEED / 2.0_f32.sqrt();
-            }
-            Action::MovingUpRight => {
-                self.entity.position.x += constants::PLAYER_SPEED / 2.0_f32.sqrt();
-                self.entity.position.y -= constants::PLAYER_SPEED / 2.0_f32.sqrt();
-            }
-            Action::MovingLeft => self.entity.position.x -= constants::PLAYER_SPEED,
-            Action::MovingDown => self.entity.position.y += constants::PLAYER_SPEED,
-            Action::MovingDownLeft => {
-                self.entity.position.x -= constants::PLAYER_SPEED / 2.0_f32.sqrt();
-                self.entity.position.y += constants::PLAYER_SPEED / 2.0_f32.sqrt();
-            }
-            Action::MovingDownRight => {
-                self.entity.position.x += constants::PLAYER_SPEED / 2.0_f32.sqrt();
-                self.entity.position.y += constants::PLAYER_SPEED / 2.0_f32.sqrt();
-            }
-            Action::MovingRight => self.entity.position.x += constants::PLAYER_SPEED,
-            Action::IdleLeft | Action::IdleRight => (),
-        }
-
-        let pixel_width = constants::TILE_WIDTH * constants::TILE_SCALE;
-        let pixel_height = constants::TILE_HEIGHT * constants::TILE_SCALE;
-
-        if self.entity.position.x < 0.0 {
-            self.entity.position.x = 0.0;
-        } else if self.entity.position.x + pixel_height > self.entity.map_dimensions.0 {
-            self.entity.position.x = self.entity.map_dimensions.0 - pixel_width;
-        }
-
-        if self.entity.position.y < 0.0 {
-            self.entity.position.y = 0.0;
-        } else if self.entity.position.y + pixel_height > self.entity.map_dimensions.1 {
-            self.entity.position.y = self.entity.map_dimensions.1 - pixel_height;
-        }
     }
 
     pub fn give_key_down(&mut self, keycode: KeyCode) {

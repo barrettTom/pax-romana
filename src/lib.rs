@@ -1,4 +1,4 @@
-pub mod animation;
+pub mod animations;
 pub mod camera;
 pub mod constants;
 pub mod entity;

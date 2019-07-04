@@ -1,19 +1,36 @@
-use ggez::graphics::{spritebatch::SpriteBatch, DrawParam, Rect};
-use ggez::nalgebra::{Point2, Vector2};
-use std::time::Instant;
+use ggez::graphics::spritebatch::SpriteBatch;
+use ggez::nalgebra::Point2;
 
+use crate::animations::{Animation, Frame};
 use crate::constants;
-use crate::math::{convert_angle_to_rad, flip, next_source};
+use crate::entity::Operable;
+use crate::math::{convert_angle_to_rad, flip};
 use crate::tileset::Tileset;
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone)]
 pub struct Tile {
     pub id: usize,
-    source: Rect,
-    animation: Vec<(usize, Rect)>,
-    timer: Instant,
+    pub animation: Animation,
     pub destination: Point2<f32>,
-    rotation: f32,
+}
+
+impl Operable for Tile {
+    fn update(&mut self) {
+        self.animation.update();
+    }
+
+    fn draw(&self, spritebatch: &mut SpriteBatch) {
+        self.animation.draw(spritebatch, self.destination);
+        /*
+            DrawParam::default()
+                .src(self.animation.current.source)
+                .dest(self.destination)
+                .offset(Point2::new(0.5, 0.5))
+                //.rotation(self.rotation)
+                .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE)),
+        );
+        */
+    }
 }
 
 impl Tile {
@@ -44,37 +61,20 @@ impl Tile {
 
         let x = i as f32 % width as f32;
         let y = (i as f32 / height as f32).floor();
-        let offset = (constants::TILE_WIDTH / 2.0) * constants::TILE_SCALE;
+        //let offset = (constants::TILE_WIDTH / 2.0) * constants::TILE_SCALE;
 
         let destination = Point2::new(
-            (constants::TILE_WIDTH * constants::TILE_SCALE * x) + offset,
-            (constants::TILE_HEIGHT * constants::TILE_SCALE * y) + offset,
+            constants::TILE_WIDTH * constants::TILE_SCALE * x, //+ offset,
+            constants::TILE_HEIGHT * constants::TILE_SCALE * y, //+ offset,
         );
+
+        let mut animation = Animation::new(Frame::new(source, None, rotation));
+        animation.give_frames(tileset.get_frames(id));
 
         Tile {
             id,
-            source,
-            animation: tileset.get_animation(id),
-            timer: Instant::now(),
+            animation,
             destination,
-            rotation,
         }
-    }
-
-    pub fn update(&mut self) {
-        let (source, timer) = next_source(self.source, &self.animation, self.timer);
-        self.source = source;
-        self.timer = timer;
-    }
-
-    pub fn draw(&self, spritebatch: &mut SpriteBatch) {
-        let draw_param = DrawParam::default()
-            .src(self.source)
-            .dest(self.destination)
-            .offset(Point2::new(0.5, 0.5))
-            .rotation(self.rotation)
-            .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE));
-
-        spritebatch.add(draw_param);
     }
 }

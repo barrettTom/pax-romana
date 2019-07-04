@@ -2,7 +2,7 @@ use ggez::filesystem::File;
 use ggez::graphics::Rect;
 use std::collections::HashMap;
 
-use crate::animation::Frame;
+use crate::animations::Frame;
 use crate::constants;
 use crate::property::Property;
 use crate::xmlelements::XMLElements;
@@ -84,13 +84,13 @@ impl Tileset {
             .collect()
     }
 
-    pub fn get_animation(&self, tile_id: usize) -> Vec<(usize, Rect)> {
+    pub fn get_frames(&self, tile_id: usize) -> Vec<Frame> {
         if let Some(property) = self.properties.iter().find(|p| p.tile_id == tile_id) {
             self.properties
                 .clone()
                 .into_iter()
                 .filter(|p| p.entity == property.entity && p.entity.is_some())
-                .map(|p| (p.delay.unwrap(), self.get(p.tile_id)))
+                .map(|p| Frame::new(self.get(p.tile_id), p.delay, 0.0))
                 .collect()
         } else {
             Vec::new()

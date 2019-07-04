@@ -1,5 +1,6 @@
 use ggez::graphics::spritebatch::SpriteBatch;
 
+use crate::entity::Operable;
 use crate::tile::Tile;
 use crate::tileset::Tileset;
 

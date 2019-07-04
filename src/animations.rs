@@ -1,11 +1,13 @@
-use ggez::graphics::Rect;
+use ggez::graphics::{spritebatch::SpriteBatch, DrawParam, Rect};
+use ggez::nalgebra::{Point2, Vector2};
 use std::collections::HashMap;
 use std::time::Instant;
 
+use crate::constants;
 use crate::entity::Action;
 use crate::tileset::Tileset;
 
-#[derive(Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Frame {
     pub source: Rect,
     pub delay: Option<usize>,
@@ -22,17 +24,29 @@ impl Frame {
     }
 }
 
-#[derive(Clone, PartialEq)]
+impl Default for Frame {
+    fn default() -> Frame {
+        Frame::new(Rect::zero(), None, 0.0)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct Animation {
     pub frames: Vec<Frame>,
     pub timer: Instant,
     pub current: Frame,
 }
 
+impl Default for Animation {
+    fn default() -> Animation {
+        Animation::new(Frame::default())
+    }
+}
+
 impl Animation {
-    pub fn new() -> Animation {
+    pub fn new(current: Frame) -> Animation {
         Animation {
-            current: Frame::new(Rect::zero(), None, 0.0),
+            current,
             timer: Instant::now(),
             frames: Vec::new(),
         }
@@ -55,9 +69,18 @@ impl Animation {
             self.current = self.frames[0].clone();
         }
     }
+
+    pub fn draw(&self, spritebatch: &mut SpriteBatch, position: Point2<f32>) {
+        spritebatch.add(
+            DrawParam::default()
+                .src(self.current.source)
+                .dest(position)
+                .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE)),
+        );
+    }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Animations {
     pub available: HashMap<Action, Animation>,
     pub current: Animation,
@@ -73,7 +96,7 @@ impl Animations {
             .source
             .h;
 
-        let mut animation = Animation::new();
+        let mut animation = Animation::new(idle.clone());
         animation.give_frames(vec![idle.clone()]);
         available.insert(Action::IdleLeft, animation.clone());
 
@@ -98,14 +121,19 @@ impl Animations {
 
         Animations {
             available,
-            current: Animation::new(),
+            current: Animation::default(),
         }
     }
 
     pub fn update(&mut self, action: &Action) {
-        let animation = self.available.get(&action).cloned().unwrap();
-        self.current.give_frames(animation.frames);
+        if let Some(animation) = self.available.get(&action).cloned() {
+            self.current.give_frames(animation.frames);
+        }
         self.current.update();
+    }
+
+    pub fn draw(&self, spritebatch: &mut SpriteBatch, position: Point2<f32>) {
+        self.current.draw(spritebatch, position)
     }
 }
 
