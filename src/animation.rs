@@ -1,81 +1,117 @@
 use ggez::graphics::Rect;
 use std::collections::HashMap;
-use std::f32::consts::PI;
 use std::time::Instant;
 
 use crate::entity::Action;
 use crate::tileset::Tileset;
 
-#[derive(Clone)]
-pub struct Animation {
-    pub animation: Vec<(usize, Rect)>,
-    pub animations: HashMap<Action, Vec<(usize, Rect)>>,
-    pub timer: Instant,
+#[derive(Clone, PartialEq)]
+pub struct Frame {
     pub source: Rect,
+    pub delay: Option<usize>,
+    pub rotation: f32,
+}
+
+impl Frame {
+    pub fn new(source: Rect, delay: Option<usize>, rotation: f32) -> Frame {
+        Frame {
+            source,
+            delay,
+            rotation,
+        }
+    }
+}
+
+#[derive(Clone, PartialEq)]
+pub struct Animation {
+    pub frames: Vec<Frame>,
+    pub timer: Instant,
+    pub current: Frame,
 }
 
 impl Animation {
-    pub fn new(tileset: &Tileset) -> Animation {
-        let mut animations = HashMap::new();
-
-        let mut source = tileset.get_tile_by_entity_keyframe("player-top", 0);
-        source.h += tileset.get_tile_by_entity_keyframe("player-bottom", 0).h;
-        animations.insert(Action::IdleLeft, vec![(1, source)]);
-
-        let mut moving = tileset.get_tile_by_entity_keyframe("player-top", 1);
-        moving.h += tileset.get_tile_by_entity_keyframe("player-bottom", 1).h;
-
-        animations.insert(Action::MovingLeft, vec![(100, source), (100, moving)]);
-        animations.insert(Action::MovingUpLeft, vec![(100, source), (100, moving)]);
-        animations.insert(Action::MovingDownLeft, vec![(100, source), (100, moving)]);
-
-        source = flip(source);
-        moving = flip(moving);
-
-        animations.insert(Action::IdleRight, vec![(1, source)]);
-
-        animations.insert(Action::MovingRight, vec![(100, source), (100, moving)]);
-        animations.insert(Action::MovingUpRight, vec![(100, source), (100, moving)]);
-        animations.insert(Action::MovingDownRight, vec![(100, source), (100, moving)]);
-
+    pub fn new() -> Animation {
         Animation {
-            animations,
-            source,
+            current: Frame::new(Rect::zero(), None, 0.0),
             timer: Instant::now(),
-            animation: Vec::new(),
+            frames: Vec::new(),
+        }
+    }
+
+    pub fn give_frames(&mut self, frames: Vec<Frame>) {
+        self.frames = frames;
+    }
+
+    pub fn update(&mut self) {
+        if let Some(mut i) = self.frames.iter().position(|a| a == &self.current) {
+            if let Some(delay) = self.current.delay {
+                if self.timer.elapsed().as_millis() > delay as u128 {
+                    i = if i == self.frames.len() - 1 { 0 } else { i + 1 };
+                    self.current = self.frames[i].clone();
+                    self.timer = Instant::now();
+                }
+            }
+        } else if !self.frames.is_empty() {
+            self.current = self.frames[0].clone();
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct Animations {
+    pub available: HashMap<Action, Animation>,
+    pub current: Animation,
+}
+
+impl Animations {
+    pub fn new(tileset: &Tileset) -> Animations {
+        let mut available = HashMap::new();
+
+        let mut idle = tileset.get_frame_by_entity_keyframe("player-top", 0);
+        idle.source.h += tileset
+            .get_frame_by_entity_keyframe("player-bottom", 0)
+            .source
+            .h;
+
+        let mut animation = Animation::new();
+        animation.give_frames(vec![idle.clone()]);
+        available.insert(Action::IdleLeft, animation.clone());
+
+        let mut moving = tileset.get_frame_by_entity_keyframe("player-top", 1);
+        moving.source.h += tileset
+            .get_frame_by_entity_keyframe("player-bottom", 1)
+            .source
+            .h;
+
+        animation.give_frames(vec![idle.clone(), moving.clone()]);
+        available.insert(Action::MovingLeft, animation.clone());
+        available.insert(Action::MovingUpLeft, animation.clone());
+        available.insert(Action::MovingDownLeft, animation.clone());
+
+        animation.give_frames(vec![flip(idle.clone())]);
+        available.insert(Action::IdleRight, animation.clone());
+
+        animation.give_frames(vec![flip(idle.clone()), flip(moving.clone())]);
+        available.insert(Action::MovingRight, animation.clone());
+        available.insert(Action::MovingUpRight, animation.clone());
+        available.insert(Action::MovingDownRight, animation.clone());
+
+        Animations {
+            available,
+            current: Animation::new(),
         }
     }
 
     pub fn update(&mut self, action: &Action) {
-        self.animation = self.animations.get(&action).cloned().unwrap_or_default();
-        let (source, timer) = next_source(self.source, &self.animation, self.timer);
-        self.source = source;
-        self.timer = timer;
+        let animation = self.available.get(&action).cloned().unwrap();
+        self.current.give_frames(animation.frames);
+        self.current.update();
     }
 }
 
-pub fn next_source(source: Rect, animation: &[(usize, Rect)], timer: Instant) -> (Rect, Instant) {
-    if let Some(mut i) = animation.iter().position(|a| a.1 == source) {
-        if timer.elapsed().as_millis() > animation[i].0 as u128 {
-            i = if i == animation.len() - 1 { 0 } else { i + 1 };
-            (animation[i].1, Instant::now())
-        } else {
-            (source, timer)
-        }
-    } else if !animation.is_empty() {
-        (animation[0].1, timer)
-    } else {
-        (source, timer)
-    }
-}
-
-pub fn convert_angle_to_rad(angle: f32) -> f32 {
-    angle * (PI / 180.0)
-}
-
-pub fn flip(rect: Rect) -> Rect {
-    let mut r = rect;
-    r.x *= -1.0;
-    r.x -= rect.w;
-    r
+pub fn flip(frame: Frame) -> Frame {
+    let mut f = frame.clone();
+    f.source.x *= -1.0;
+    f.source.x -= frame.source.w;
+    f
 }

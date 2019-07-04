@@ -2,6 +2,7 @@ use ggez::filesystem::File;
 use ggez::graphics::Rect;
 use std::collections::HashMap;
 
+use crate::animation::Frame;
 use crate::constants;
 use crate::property::Property;
 use crate::xmlelements::XMLElements;
@@ -96,17 +97,23 @@ impl Tileset {
         }
     }
 
-    pub fn get_tile_by_entity_keyframe(&self, entity: &str, keyframe: usize) -> Rect {
-        *self
-            .tiles
-            .get(
-                &self
-                    .properties
-                    .iter()
-                    .find(|p| p.entity == Some(entity.to_string()) && Some(keyframe) == p.keyframe)
-                    .unwrap()
-                    .tile_id,
-            )
+    pub fn get_frame_by_entity_keyframe(&self, entity: &str, keyframe: usize) -> Frame {
+        let tile_id = &self
+            .properties
+            .iter()
+            .find(|p| p.entity == Some(entity.to_string()) && Some(keyframe) == p.keyframe)
             .unwrap()
+            .tile_id;
+
+        let delay = self
+            .properties
+            .iter()
+            .find(|p| p.tile_id == *tile_id && p.delay.is_some())
+            .unwrap()
+            .delay;
+
+        let source = self.tiles.get(tile_id).unwrap();
+
+        Frame::new(*source, delay, 0.0)
     }
 }

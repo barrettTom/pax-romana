@@ -2,8 +2,8 @@
 ## pax-romana
 
 ### goals
-* character sprite
 * collision
-* sprites with movements (tile states)
 * fat binary (include-bytes!)
 * textbox (with dialog options)
+* have tile use the animation struct
+* have the tileset have the translated ids within the hashmap

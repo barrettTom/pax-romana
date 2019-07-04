@@ -2,21 +2,21 @@ use ggez::event::KeyCode;
 use ggez::graphics::{spritebatch::SpriteBatch, DrawParam};
 use ggez::nalgebra::{Point2, Vector2};
 
-use crate::animation::Animation;
+use crate::animation::Animations;
 use crate::constants;
 use crate::entity::{Action, Entity, Operable};
 use crate::tileset::Tileset;
 
 pub struct Player {
     entity: Entity,
-    animation: Animation,
+    animations: Animations,
 }
 
 impl Operable for Player {
     fn draw(&self, spritebatch: &mut SpriteBatch) {
         spritebatch.add(
             DrawParam::default()
-                .src(self.animation.source)
+                .src(self.animations.current.current.source)
                 .dest(self.entity.position)
                 .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE)),
         );
@@ -24,7 +24,7 @@ impl Operable for Player {
 
     fn update(&mut self) {
         self.move_position();
-        self.animation.update(&self.entity.action);
+        self.animations.update(&self.entity.action);
     }
 }
 
@@ -32,7 +32,7 @@ impl Player {
     pub fn new(tileset: &Tileset, dimensions: (f32, f32)) -> Player {
         Player {
             entity: Entity::new(Point2::new(0.0, 0.0), dimensions),
-            animation: Animation::new(tileset),
+            animations: Animations::new(tileset),
         }
     }
 

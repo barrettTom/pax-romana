@@ -2,7 +2,7 @@ use ggez::graphics::{spritebatch::SpriteBatch, DrawParam};
 use ggez::nalgebra::{/*distance,*/ Point2, Vector2};
 //use std::time::Instant;
 
-use crate::animation::Animation;
+use crate::animation::Animations;
 use crate::constants;
 use crate::entity::{Entity, Operable};
 use crate::map::Map;
@@ -12,14 +12,14 @@ use crate::tileset::Tileset;
 pub struct NPC {
     entity: Entity,
     behavior: Behavior,
-    animation: Animation,
+    animations: Animations,
 }
 
 impl Operable for NPC {
     fn draw(&self, spritebatch: &mut SpriteBatch) {
         spritebatch.add(
             DrawParam::default()
-                .src(self.animation.source)
+                .src(self.animations.current.current.source)
                 .dest(self.entity.position)
                 .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE)),
         );
@@ -32,7 +32,7 @@ impl Operable for NPC {
             Behavior::Waiting(time) => (),
         }
         */
-        self.animation.update(&self.entity.action);
+        self.animations.update(&self.entity.action);
     }
 }
 
@@ -41,7 +41,7 @@ impl NPC {
         NPC {
             entity: Entity::new(spawn, map_dimensions),
             behavior: Behavior::Wandering(None),
-            animation: Animation::new(tileset),
+            animations: Animations::new(tileset),
         }
     }
 
