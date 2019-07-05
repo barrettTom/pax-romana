@@ -7,7 +7,7 @@ pub const ENTITY_SPEED: f32 = 2.5;
 pub const WANDER_DISTANCE: f32 = 150.0;
 pub const GOAL_DISTANCE: f32 = 6.0;
 
-pub const FLIP_HORIZONTAL_FLAG: usize = 0x8000_0000;
-pub const FLIP_VERTICAL_FLAG: usize = 0x4000_0000;
-pub const FLIP_DIAGONAL_FLAG: usize = 0x2000_0000;
-pub const ALL_FLIP_FLAGS: usize = FLIP_DIAGONAL_FLAG | FLIP_HORIZONTAL_FLAG | FLIP_VERTICAL_FLAG;
+pub const FLIP_H: usize = 0x8000_0000;
+pub const FLIP_V: usize = 0x4000_0000;
+pub const FLIP_D: usize = 0x2000_0000;
+pub const FLIP_A: usize = FLIP_D | FLIP_H | FLIP_V;

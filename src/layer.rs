@@ -1,41 +1,39 @@
 use ggez::graphics::spritebatch::SpriteBatch;
 
 use crate::entity::Operable;
-use crate::tile::Tile;
+use crate::tile::Cell;
 use crate::tileset::Tileset;
 
 #[derive(Debug, Clone)]
 pub struct Layer {
-    pub tiles: Vec<Tile>,
-    width: usize,
-    height: usize,
+    pub cells: Vec<Cell>,
+    dimensions: (usize, usize),
 }
 
 impl Operable for Layer {
     fn update(&mut self) {
-        for tile in self.tiles.iter_mut() {
-            tile.update();
+        for cell in self.cells.iter_mut() {
+            cell.update();
         }
     }
 
     fn draw(&self, spritebatch: &mut SpriteBatch) {
-        for tile in self.tiles.iter() {
-            tile.draw(spritebatch);
+        for cell in self.cells.iter() {
+            cell.draw(spritebatch);
         }
     }
 }
 
 impl Layer {
-    pub fn new(text: &str, tileset: &Tileset, width: usize, height: usize) -> Layer {
+    pub fn new(text: &str, tileset: &Tileset, dimensions: (usize, usize)) -> Layer {
         Layer {
-            tiles: text
+            cells: text
                 .replace("\n", "")
                 .split(',')
                 .enumerate()
-                .map(|(i, s)| Tile::new(s, i, tileset, width, height))
+                .map(|(i, s)| Cell::new(s, i, tileset, dimensions))
                 .collect(),
-            width,
-            height,
+            dimensions,
         }
     }
 }

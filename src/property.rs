@@ -2,10 +2,10 @@ use xml::reader::XmlEvent;
 
 use crate::xmlelements::XMLElements;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Property {
-    pub tile_id: usize,
     pub entity: Option<String>,
+    pub rotation: f32,
     pub keyframe: Option<usize>,
     pub delay: Option<usize>,
     pub spawn: Option<String>,
@@ -13,7 +13,7 @@ pub struct Property {
 }
 
 impl Property {
-    pub fn new(tile_id: usize, property_elements: Vec<XmlEvent>) -> Property {
+    pub fn new(property_elements: Vec<XmlEvent>) -> Property {
         let entity = match XMLElements::get_attribute_value(&property_elements, "entity") {
             Ok(entity) => entity.parse().ok(),
             Err(_) => None,
@@ -33,12 +33,25 @@ impl Property {
         };
 
         Property {
-            tile_id,
+            rotation: 0.0,
             entity,
             keyframe,
             delay,
             spawn,
             visible,
+        }
+    }
+}
+
+impl Default for Property {
+    fn default() -> Property {
+        Property {
+            rotation: 0.0,
+            entity: None,
+            keyframe: None,
+            delay: None,
+            spawn: None,
+            visible: None,
         }
     }
 }

@@ -72,6 +72,10 @@ impl EventHandler for State {
         Ok(())
     }
 
+    fn key_up_event(&mut self, _: &mut Context, keycode: KeyCode, _: KeyMods) {
+        self.player.give_key_up(keycode)
+    }
+
     fn key_down_event(
         &mut self,
         context: &mut Context,
@@ -85,9 +89,5 @@ impl EventHandler for State {
                 _ => self.player.give_key_down(keycode),
             }
         }
-    }
-
-    fn key_up_event(&mut self, _: &mut Context, keycode: KeyCode, _: KeyMods) {
-        self.player.give_key_up(keycode)
     }
 }
