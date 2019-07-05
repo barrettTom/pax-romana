@@ -1,10 +1,9 @@
 use ggez::graphics::spritebatch::SpriteBatch;
 use ggez::nalgebra::Point2;
 
-use crate::animations::{Animation, Frame};
+use crate::animations::{convert_angle_to_rad, flip, Animation, Frame};
 use crate::constants;
 use crate::entity::Operable;
-use crate::math::{convert_angle_to_rad, flip};
 use crate::tileset::Tileset;
 
 #[derive(Debug, Clone)]
@@ -37,6 +36,7 @@ impl Tile {
     pub fn new(text: &str, i: usize, tileset: &Tileset, width: usize, height: usize) -> Tile {
         let id = text.parse::<usize>().unwrap();
 
+        /*
         let flip_d = (id & constants::FLIP_DIAGONAL_FLAG) == constants::FLIP_DIAGONAL_FLAG;
         let flip_h = (id & constants::FLIP_HORIZONTAL_FLAG) == constants::FLIP_HORIZONTAL_FLAG;
         let flip_v = (id & constants::FLIP_VERTICAL_FLAG) == constants::FLIP_VERTICAL_FLAG;
@@ -58,6 +58,7 @@ impl Tile {
             //(false, false, false) => (),
             _ => (tileset.get(id), 0.0),
         };
+        */
 
         let x = i as f32 % width as f32;
         let y = (i as f32 / height as f32).floor();
@@ -68,12 +69,16 @@ impl Tile {
             constants::TILE_HEIGHT * constants::TILE_SCALE * y, //+ offset,
         );
 
-        let mut animation = Animation::new(Frame::new(source, None, rotation));
+        //let mut animation = Animation::new(Frame::new(source, None, rotation));
+        /*
+        let frame = tileset.get_frame(id);
+        let mut animation = Animation::default();
         animation.give_frames(tileset.get_frames(id));
+        */
 
         Tile {
             id,
-            animation,
+            animation: tileset.get_animation(id),
             destination,
         }
     }

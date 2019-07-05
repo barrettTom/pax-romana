@@ -1,6 +1,7 @@
 use ggez::graphics::{spritebatch::SpriteBatch, DrawParam, Rect};
 use ggez::nalgebra::{Point2, Vector2};
 use std::collections::HashMap;
+use std::f32::consts::PI;
 use std::time::Instant;
 
 use crate::constants;
@@ -142,4 +143,8 @@ pub fn flip(frame: Frame) -> Frame {
     f.source.x *= -1.0;
     f.source.x -= frame.source.w;
     f
+}
+
+pub fn convert_angle_to_rad(angle: f32) -> f32 {
+    angle * (PI / 180.0)
 }

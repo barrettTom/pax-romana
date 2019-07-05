@@ -2,13 +2,13 @@ use ggez::filesystem::File;
 use ggez::graphics::Rect;
 use std::collections::HashMap;
 
-use crate::animations::Frame;
+use crate::animations::{Animation, Frame};
 use crate::constants;
 use crate::property::Property;
 use crate::xmlelements::XMLElements;
 
 pub struct Tileset {
-    tiles: HashMap<usize, Rect>,
+    tiles: HashMap<usize, Frame>,
     properties: Vec<Property>,
 }
 
@@ -30,7 +30,7 @@ impl Tileset {
         let rows = height / (constants::TILE_HEIGHT as usize);
 
         let mut tiles = HashMap::new();
-        tiles.insert(0, Rect::zero());
+        tiles.insert(0, Frame::default());
 
         let w = 1.0 / columns as f32;
         let h = 1.0 / rows as f32;
@@ -39,7 +39,7 @@ impl Tileset {
             for c in 0..columns {
                 let x = c as f32 / columns as f32;
                 let y = r as f32 / rows as f32;
-                tiles.insert(key, Rect::new(x, y, w, h));
+                tiles.insert(key, Frame::new(Rect::new(x, y, w, h), None, 0.0));
                 key += 1;
             }
         }
@@ -65,14 +65,12 @@ impl Tileset {
             .collect();
 
         for i in invisible {
-            *tiles.get_mut(&i).unwrap() = Rect::zero();
+            *tiles.get_mut(&i).unwrap() = Frame::default();
         }
 
-        Tileset { tiles, properties }
-    }
+        for tile in &tiles {}
 
-    pub fn get(&self, id: usize) -> Rect {
-        *self.tiles.get(&id).unwrap()
+        Tileset { tiles, properties }
     }
 
     pub fn get_spawn_tiles(&self) -> Vec<(String, usize)> {
@@ -84,17 +82,23 @@ impl Tileset {
             .collect()
     }
 
+    /*
     pub fn get_frames(&self, tile_id: usize) -> Vec<Frame> {
         if let Some(property) = self.properties.iter().find(|p| p.tile_id == tile_id) {
             self.properties
                 .clone()
                 .into_iter()
                 .filter(|p| p.entity == property.entity && p.entity.is_some())
-                .map(|p| Frame::new(self.get(p.tile_id), p.delay, 0.0))
+                .map(|p| Frame::new(*self.tiles.get(&p.tile_id).unwrap(), p.delay, 0.0))
                 .collect()
         } else {
             Vec::new()
         }
+    }
+    */
+
+    pub fn get_animation(&self, tile_id: usize) -> Animation {
+        Animation::default()
     }
 
     pub fn get_frame_by_entity_keyframe(&self, entity: &str, keyframe: usize) -> Frame {
@@ -105,6 +109,7 @@ impl Tileset {
             .unwrap()
             .tile_id;
 
+        /*
         let delay = self
             .properties
             .iter()
@@ -112,8 +117,9 @@ impl Tileset {
             .unwrap()
             .delay;
 
-        let source = self.tiles.get(tile_id).unwrap();
-
         Frame::new(*source, delay, 0.0)
+        */
+
+        self.tiles.get(tile_id).unwrap().clone()
     }
 }

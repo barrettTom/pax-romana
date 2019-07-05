@@ -4,6 +4,7 @@ use ggez::nalgebra::Point2;
 use xml::reader::XmlEvent::Characters;
 
 use crate::constants;
+use crate::entity::Operable;
 use crate::layer::Layer;
 use crate::tileset::Tileset;
 use crate::xmlelements::XMLElements;
@@ -14,6 +15,20 @@ pub struct Map {
     height: usize,
     layers: Vec<Layer>,
     spawns: Vec<(String, Point2<f32>)>,
+}
+
+impl Operable for Map {
+    fn draw(&self, spritebatch: &mut SpriteBatch) {
+        for layer in self.layers.iter() {
+            layer.draw(spritebatch);
+        }
+    }
+
+    fn update(&mut self) {
+        for layer in self.layers.iter_mut() {
+            layer.update();
+        }
+    }
 }
 
 impl Map {
@@ -70,18 +85,6 @@ impl Map {
         }
 
         spawn_points
-    }
-
-    pub fn draw(&self, spritebatch: &mut SpriteBatch) {
-        for layer in self.layers.iter() {
-            layer.draw(spritebatch);
-        }
-    }
-
-    pub fn update(&mut self) {
-        for layer in self.layers.iter_mut() {
-            layer.update();
-        }
     }
 
     pub fn get_spawns(&self) -> Vec<(String, Point2<f32>)> {

@@ -11,6 +11,20 @@ pub struct Layer {
     height: usize,
 }
 
+impl Operable for Layer {
+    fn update(&mut self) {
+        for tile in self.tiles.iter_mut() {
+            tile.update();
+        }
+    }
+
+    fn draw(&self, spritebatch: &mut SpriteBatch) {
+        for tile in self.tiles.iter() {
+            tile.draw(spritebatch);
+        }
+    }
+}
+
 impl Layer {
     pub fn new(text: &str, tileset: &Tileset, width: usize, height: usize) -> Layer {
         Layer {
@@ -22,18 +36,6 @@ impl Layer {
                 .collect(),
             width,
             height,
-        }
-    }
-
-    pub fn update(&mut self) {
-        for tile in self.tiles.iter_mut() {
-            tile.update();
-        }
-    }
-
-    pub fn draw(&self, spritebatch: &mut SpriteBatch) {
-        for tile in self.tiles.iter() {
-            tile.draw(spritebatch);
         }
     }
 }
