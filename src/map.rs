@@ -7,7 +7,8 @@ use xml::reader::XmlEvent::Characters;
 use crate::constants;
 use crate::entity::Operable;
 use crate::layer::Layer;
-use crate::tileset::{Tile, Tileset};
+use crate::tile::Tile;
+use crate::tileset::Tileset;
 use crate::xmlelements::XMLElements;
 
 #[derive(Clone)]
@@ -79,7 +80,8 @@ impl Map {
             for cell in layer.cells.iter() {
                 for (id, tile) in spawn_tiles.iter() {
                     if id == &cell.id {
-                        spawn_points.push((tile.property.spawn.clone().unwrap(), cell.destination));
+                        spawn_points
+                            .push((tile.properties.spawn.clone().unwrap(), cell.destination));
                     }
                 }
             }

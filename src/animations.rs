@@ -5,7 +5,8 @@ use std::time::Instant;
 
 use crate::constants;
 use crate::entity::Action;
-use crate::tileset::{Tile, Tileset};
+use crate::tile::Tile;
+use crate::tileset::Tileset;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Animation {
@@ -29,7 +30,7 @@ impl Animation {
 
     pub fn update(&mut self) {
         if let Some(mut i) = self.frames.iter().position(|a| a == &self.current) {
-            if let Some(delay) = self.current.property.delay {
+            if let Some(delay) = self.current.properties.delay {
                 if self.timer.elapsed().as_millis() > delay as u128 {
                     i = if i == self.frames.len() - 1 { 0 } else { i + 1 };
                     self.current = self.frames[i].clone();

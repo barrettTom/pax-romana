@@ -1,59 +1,81 @@
-use ggez::graphics::spritebatch::SpriteBatch;
-use ggez::nalgebra::Point2;
+use ggez::graphics::Rect;
+use xml::reader::XmlEvent;
 
-use crate::animations::Animation;
-use crate::constants;
-use crate::entity::Operable;
-use crate::tileset::Tileset;
+use crate::xmlelements::XMLElements;
 
-#[derive(Debug, Clone)]
-pub struct Cell {
-    pub id: usize,
-    pub animation: Animation,
-    pub destination: Point2<f32>,
+#[derive(Clone, Debug, PartialEq)]
+pub struct Tile {
+    pub source: Rect,
+    pub properties: Properties,
 }
 
-impl Operable for Cell {
-    fn update(&mut self) {
-        self.animation.update();
+impl Tile {
+    pub fn new(source: Rect, properties: Properties) -> Tile {
+        Tile { source, properties }
     }
 
-    fn draw(&self, spritebatch: &mut SpriteBatch) {
-        self.animation.draw(spritebatch, self.destination);
+    pub fn flip(&mut self) {
+        self.source.x *= -1.0;
+        self.source.x -= self.source.w;
     }
 }
 
-impl Cell {
-    pub fn new(text: &str, i: usize, tileset: &Tileset, dimensions: (usize, usize)) -> Cell {
-        let id = text.parse::<usize>().unwrap();
+impl Default for Tile {
+    fn default() -> Tile {
+        Tile::new(Rect::zero(), Properties::default())
+    }
+}
 
-        /*
-        let (source, rotation) = match (flip_d, flip_h, flip_v) {
-            (true, true, true) => (flip(tileset.get(id)), convert_angle_to_rad(90.0)),
-            (true, true, false) => (tileset.get(id), convert_angle_to_rad(90.0)),
-            (true, false, true) => (tileset.get(id), convert_angle_to_rad(270.0)),
-            //(true, false, false) => (),
-            (false, true, true) => (tileset.get(id), convert_angle_to_rad(180.0)),
-            (false, true, false) => (flip(tileset.get(id)), 0.0),
-            //(false, false, true) => (),
-            //(false, false, false) => (),
-            _ => (tileset.get(id), 0.0),
+#[derive(Debug, Clone, PartialEq)]
+pub struct Properties {
+    pub entity: Option<String>,
+    pub rotation: f32,
+    pub keyframe: Option<usize>,
+    pub delay: Option<usize>,
+    pub spawn: Option<String>,
+    pub visible: Option<bool>,
+}
+
+impl Properties {
+    pub fn new(properties_elements: Vec<XmlEvent>) -> Properties {
+        let entity = match XMLElements::get_attribute_value(&properties_elements, "entity") {
+            Ok(entity) => entity.parse().ok(),
+            Err(_) => None,
         };
-        */
+        let keyframe = match XMLElements::get_attribute_value(&properties_elements, "keyframe") {
+            Ok(keyframe) => keyframe.parse().ok(),
+            Err(_) => None,
+        };
+        let delay = match XMLElements::get_attribute_value(&properties_elements, "delay") {
+            Ok(delay) => delay.parse().ok(),
+            Err(_) => None,
+        };
+        let spawn = XMLElements::get_attribute_value(&properties_elements, "spawn").ok();
+        let visible = match XMLElements::get_attribute_value(&properties_elements, "visible") {
+            Ok(visible) => visible.parse().ok(),
+            Err(_) => None,
+        };
 
-        let x = i as f32 % dimensions.0 as f32;
-        let y = (i as f32 / dimensions.1 as f32).floor();
-        //let offset = (constants::TILE_WIDTH / 2.0) * constants::TILE_SCALE;
+        Properties {
+            rotation: 0.0,
+            entity,
+            keyframe,
+            delay,
+            spawn,
+            visible,
+        }
+    }
+}
 
-        let destination = Point2::new(
-            constants::TILE_WIDTH * constants::TILE_SCALE * x, //+ offset,
-            constants::TILE_HEIGHT * constants::TILE_SCALE * y, //+ offset,
-        );
-
-        Cell {
-            id,
-            animation: tileset.get_animation(id),
-            destination,
+impl Default for Properties {
+    fn default() -> Properties {
+        Properties {
+            rotation: 0.0,
+            entity: None,
+            keyframe: None,
+            delay: None,
+            spawn: None,
+            visible: None,
         }
     }
 }

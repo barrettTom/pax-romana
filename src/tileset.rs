@@ -5,38 +5,8 @@ use std::f32::consts::PI;
 
 use crate::animations::Animation;
 use crate::constants::{self, FLIP_A, FLIP_D, FLIP_H, FLIP_V};
-use crate::property::Property;
+use crate::tile::{Properties, Tile};
 use crate::xmlelements::XMLElements;
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Tile {
-    pub source: Rect,
-    pub property: Property,
-}
-
-impl Tile {
-    pub fn new(source: Rect, property: Property) -> Tile {
-        Tile { source, property }
-    }
-
-    pub fn flip(&mut self) {
-        self.source.x *= -1.0;
-        self.source.x -= self.source.w;
-    }
-}
-
-fn flip(tile: Tile) -> Tile {
-    let mut t = tile.clone();
-    t.source.x *= -1.0;
-    t.source.x -= t.source.w;
-    t
-}
-
-impl Default for Tile {
-    fn default() -> Tile {
-        Tile::new(Rect::zero(), Property::default())
-    }
-}
 
 pub struct Tileset {
     tiles: HashMap<usize, Tile>,
@@ -79,14 +49,14 @@ impl Tileset {
                         == id
                 });
 
-                let property = match tile_element {
+                let properties = match tile_element {
                     Some(tile_element) => {
-                        Property::new(elements.get_children(&tile_element, "property"))
+                        Properties::new(elements.get_children(&tile_element, "property"))
                     }
-                    None => Property::default(),
+                    None => Properties::default(),
                 };
 
-                tiles.insert(id, Tile::new(Rect::new(x, y, w, h), property));
+                tiles.insert(id, Tile::new(Rect::new(x, y, w, h), properties));
                 id += 1;
             }
         }
@@ -117,7 +87,7 @@ impl Tileset {
         self.tiles
             .clone()
             .into_iter()
-            .filter(|(_, t)| t.property.spawn.is_some())
+            .filter(|(_, t)| t.properties.spawn.is_some())
             .collect()
     }
 
@@ -130,12 +100,12 @@ impl Tileset {
             .1
             .clone();
 
-        if first_tile.property.entity.is_some() {
+        if first_tile.properties.entity.is_some() {
             Animation::new(
                 self.tiles
                     .values()
                     .cloned()
-                    .filter(|t| t.property.entity == first_tile.property.entity)
+                    .filter(|t| t.properties.entity == first_tile.properties.entity)
                     .collect(),
             )
         } else {
@@ -144,20 +114,24 @@ impl Tileset {
     }
 
     pub fn get_tile_by_entity_keyframe(&self, entity: &str, keyframe: usize) -> Tile {
-        let tile_id = self
-            .tiles
-            .iter()
-            .find(|(_, t)| {
-                t.property.entity == Some(entity.to_string())
-                    && Some(keyframe) == t.property.keyframe
+        self.tiles
+            .values()
+            .find(|t| {
+                t.properties.entity == Some(entity.to_string())
+                    && Some(keyframe) == t.properties.keyframe
             })
             .unwrap()
-            .0;
-
-        self.tiles.get(tile_id).unwrap().clone()
+            .clone()
     }
 }
 
 pub fn convert_angle_to_rad(angle: f32) -> f32 {
     angle * (PI / 180.0)
+}
+
+fn flip(tile: Tile) -> Tile {
+    let mut t = tile.clone();
+    t.source.x *= -1.0;
+    t.source.x -= t.source.w;
+    t
 }

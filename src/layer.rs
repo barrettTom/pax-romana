@@ -1,7 +1,7 @@
 use ggez::graphics::spritebatch::SpriteBatch;
 
+use crate::cell::Cell;
 use crate::entity::Operable;
-use crate::tile::Cell;
 use crate::tileset::Tileset;
 
 #[derive(Debug, Clone)]
