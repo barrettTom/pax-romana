@@ -64,13 +64,13 @@ impl Tileset {
         for (id, tile) in tiles.clone().into_iter() {
             for i in 1..8 {
                 let (new_id, new_tile) = match i {
-                    1 => ((id | FLIP_H), tile.clone()),
-                    2 => ((id | FLIP_V), flip(tile.clone())),
+                    1 => ((id | FLIP_H), flip(tile.clone())),
+                    2 => ((id | FLIP_V), tile.clone()),
                     3 => ((id | FLIP_D), tile.clone()),
-                    4 => ((id | FLIP_D | FLIP_H), tile.clone()),
-                    5 => ((id | FLIP_D | FLIP_V), tile.clone()),
-                    6 => ((id | FLIP_H | FLIP_V), tile.clone()),
-                    7 => ((id | FLIP_A), tile.clone()),
+                    4 => ((id | FLIP_D | FLIP_H), rotate(tile.clone(), 90.0)),
+                    5 => ((id | FLIP_D | FLIP_V), rotate(tile.clone(), 270.0)),
+                    6 => ((id | FLIP_H | FLIP_V), rotate(tile.clone(), 180.0)),
+                    7 => ((id | FLIP_A), rotate(tile.clone(), 90.0)),
                     _ => (0, Tile::default()),
                 };
 
@@ -133,5 +133,11 @@ fn flip(tile: Tile) -> Tile {
     let mut t = tile.clone();
     t.source.x *= -1.0;
     t.source.x -= t.source.w;
+    t
+}
+
+fn rotate(tile: Tile, angle: f32) -> Tile {
+    let mut t = tile.clone();
+    t.properties.rotation = convert_angle_to_rad(angle);
     t
 }

@@ -46,6 +46,8 @@ impl Animation {
         spritebatch.add(
             DrawParam::default()
                 .src(self.current.source)
+                .rotation(self.current.properties.rotation)
+                .offset(Point2::new(0.5, 0.5))
                 .dest(position)
                 .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE)),
         );
