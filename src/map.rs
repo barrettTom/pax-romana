@@ -61,7 +61,7 @@ impl Map {
             })
             .collect();
 
-        let spawns = Map::get_spawn_points(&layers, tileset.get_spawn_tiles());
+        let spawns = Map::find_spawn_points(&layers, tileset.get_spawn_tiles());
 
         Map {
             layers,
@@ -70,7 +70,7 @@ impl Map {
         }
     }
 
-    fn get_spawn_points(
+    fn find_spawn_points(
         layers: &[Layer],
         spawn_tiles: HashMap<usize, Tile>,
     ) -> Vec<(String, Point2<f32>)> {
@@ -90,8 +90,13 @@ impl Map {
         spawn_points
     }
 
-    pub fn get_spawns(&self) -> Vec<(String, Point2<f32>)> {
-        self.spawns.clone()
+    pub fn get_spawn_points(&self, name: &str) -> Vec<Point2<f32>> {
+        self.spawns
+            .clone()
+            .into_iter()
+            .filter(|s| s.0 == name)
+            .map(|s| s.1)
+            .collect()
     }
 
     pub fn get_dimensions(&self) -> (f32, f32) {

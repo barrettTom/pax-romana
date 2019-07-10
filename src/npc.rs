@@ -72,8 +72,8 @@ impl NPC {
     pub fn build_npcs(tileset: &Tileset, map: &Map) -> Vec<NPC> {
         let mut npcs = Vec::new();
 
-        for (_name, position) in map.get_spawns() {
-            npcs.push(NPC::new(tileset, position, map.get_dimensions()));
+        for point in map.get_spawn_points("peasant") {
+            npcs.push(NPC::new(tileset, point, map.get_dimensions()));
         }
 
         npcs

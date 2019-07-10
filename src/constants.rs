@@ -7,6 +7,8 @@ pub const ENTITY_SPEED: f32 = 2.5;
 pub const WANDER_DISTANCE: f32 = 150.0;
 pub const GOAL_DISTANCE: f32 = 6.0;
 
+pub const FLOAT_PRECISION: f32 = 0.001;
+
 pub const FLIP_H: usize = 0x8000_0000;
 pub const FLIP_V: usize = 0x4000_0000;
 pub const FLIP_D: usize = 0x2000_0000;

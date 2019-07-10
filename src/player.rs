@@ -23,9 +23,9 @@ impl Operable for Player {
 }
 
 impl Player {
-    pub fn new(tileset: &Tileset, dimensions: (f32, f32)) -> Player {
+    pub fn new(tileset: &Tileset, spawn: Point2<f32>, map_dimensions: (f32, f32)) -> Player {
         Player {
-            entity: Entity::new(Point2::new(0.0, 0.0), dimensions),
+            entity: Entity::new(spawn, map_dimensions),
             animations: Animations::new(tileset),
         }
     }

@@ -65,8 +65,8 @@ impl Tileset {
             for i in 1..8 {
                 let (new_id, new_tile) = match i {
                     1 => ((id | FLIP_H), flip(tile.clone())),
-                    2 => ((id | FLIP_V), tile.clone()),
-                    3 => ((id | FLIP_D), tile.clone()),
+                    //2 => ((id | FLIP_V), tile.clone()),
+                    //3 => ((id | FLIP_D), tile.clone()),
                     4 => ((id | FLIP_D | FLIP_H), rotate(tile.clone(), 90.0)),
                     5 => ((id | FLIP_D | FLIP_V), rotate(tile.clone(), 270.0)),
                     6 => ((id | FLIP_H | FLIP_V), rotate(tile.clone(), 180.0)),
@@ -95,7 +95,9 @@ impl Tileset {
         let first_tile = self
             .tiles
             .iter()
-            .find(|(id, _)| id == &&tile_id)
+            .find(
+                |(id, _)| id == &&tile_id
+            )
             .unwrap()
             .1
             .clone();
@@ -105,8 +107,13 @@ impl Tileset {
                 self.tiles
                     .values()
                     .cloned()
-                    .filter(|t| t.properties.entity == first_tile.properties.entity)
-                    .collect(),
+                    .filter(|t| {
+                        t.properties.entity == first_tile.properties.entity
+                            && (t.properties.rotation - first_tile.properties.rotation) < constants::FLOAT_PRECISION
+                            && t.source.x.is_sign_positive() == first_tile.source.x.is_sign_positive()
+                            && t.source.y.is_sign_positive() == first_tile.source.y.is_sign_positive()
+                    })
+                    .collect()
             )
         } else {
             Animation::new(vec![first_tile])
@@ -119,6 +126,9 @@ impl Tileset {
             .find(|t| {
                 t.properties.entity == Some(entity.to_string())
                     && Some(keyframe) == t.properties.keyframe
+                    && t.properties.rotation == 0.0
+                    && t.source.x > 0.0
+                    && t.source.y > 0.0
             })
             .unwrap()
             .clone()

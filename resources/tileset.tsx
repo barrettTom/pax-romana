@@ -8,6 +8,12 @@
    <property name="keyframe" type="int" value="0"/>
   </properties>
  </tile>
+ <tile id="15">
+  <properties>
+   <property name="spawn" value="player"/>
+   <property name="visible" type="bool" value="false"/>
+  </properties>
+ </tile>
  <tile id="24">
   <properties>
    <property name="delay" type="int" value="100"/>

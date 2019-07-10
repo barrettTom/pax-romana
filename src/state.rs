@@ -26,13 +26,16 @@ impl State {
         let tileset = Tileset::new(filesystem::open(context, "/tileset.tsx")?);
 
         let map = Map::new(filesystem::open(context, "/map.tmx")?, &tileset);
-        let map_dimensions = map.get_dimensions();
 
         Ok(State {
             map: map.clone(),
             spritebatch: SpriteBatch::new(image),
-            camera: Camera::new(context, map_dimensions),
-            player: Player::new(&tileset, map_dimensions),
+            camera: Camera::new(context, map.get_dimensions()),
+            player: Player::new(
+                &tileset,
+                map.get_spawn_points("player")[0],
+                map.get_dimensions(),
+            ),
             npcs: NPC::build_npcs(&tileset, &map),
         })
     }
