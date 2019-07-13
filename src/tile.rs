@@ -1,7 +1,9 @@
-use ggez::graphics::Rect;
+use ggez::graphics::{spritebatch::SpriteBatch, DrawParam, Rect};
+use ggez::nalgebra::{Point2, Vector2};
 use std::f32::consts::PI;
 use xml::reader::XmlEvent;
 
+use crate::constants;
 use crate::xmlelements::XMLElements;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -13,6 +15,24 @@ pub struct Tile {
 impl Tile {
     pub fn new(source: Rect, properties: Properties) -> Tile {
         Tile { source, properties }
+    }
+
+    pub fn draw(&self, spritebatch: &mut SpriteBatch, position: Point2<f32>) {
+        let draw = match self.properties.visible {
+            Some(draw) => draw,
+            None => true,
+        };
+
+        if draw {
+            spritebatch.add(
+                DrawParam::default()
+                    .src(self.source)
+                    .rotation(self.properties.rotation)
+                    .offset(Point2::new(0.5, 0.5))
+                    .dest(position)
+                    .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE)),
+            );
+        }
     }
 }
 
@@ -28,6 +48,7 @@ pub struct Properties {
     pub rotation: f32,
     pub keyframe: Option<usize>,
     pub delay: Option<usize>,
+    pub scramble_delay: Option<bool>,
     pub spawn: Option<String>,
     pub visible: Option<bool>,
 }
@@ -42,21 +63,38 @@ impl Properties {
             Ok(keyframe) => keyframe.parse().ok(),
             Err(_) => None,
         };
-        let delay = match XMLElements::get_attribute_value(&properties_elements, "delay") {
-            Ok(delay) => delay.parse().ok(),
-            Err(_) => None,
-        };
         let spawn = XMLElements::get_attribute_value(&properties_elements, "spawn").ok();
         let visible = match XMLElements::get_attribute_value(&properties_elements, "visible") {
             Ok(visible) => visible.parse().ok(),
             Err(_) => None,
         };
+        let delay = match XMLElements::get_attribute_value(&properties_elements, "delay") {
+            Ok(delay) => delay.parse().ok(),
+            Err(_) => None,
+        };
+        let scramble_delay =
+            match XMLElements::get_attribute_value(&properties_elements, "scramble_delay") {
+                Ok(scramble_delay) => scramble_delay.parse().ok(),
+                Err(_) => None,
+            };
+
+        /*
+        if scramble_delay {
+            println!("in");
+            let mut rng = rand::thread_rng();
+            let d = delay.unwrap() as f32;
+            let normal = Normal::new(d, d * 0.50).unwrap();
+            delay = Some(normal.sample(&mut rng) as usize);
+            println!("{:?}", delay);
+        }
+        */
 
         Properties {
             rotation: 0.0,
             entity,
             keyframe,
             delay,
+            scramble_delay,
             spawn,
             visible,
         }
@@ -70,6 +108,7 @@ impl Default for Properties {
             entity: None,
             keyframe: None,
             delay: None,
+            scramble_delay: None,
             spawn: None,
             visible: None,
         }

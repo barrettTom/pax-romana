@@ -1,9 +1,9 @@
-use ggez::graphics::{spritebatch::SpriteBatch, DrawParam};
-use ggez::nalgebra::{Point2, Vector2};
+use ggez::graphics::spritebatch::SpriteBatch;
+use ggez::nalgebra::Point2;
+use rand::Rng;
 use std::collections::HashMap;
 use std::time::Instant;
 
-use crate::constants;
 use crate::entity::Action;
 use crate::tile::{flip, Tile};
 use crate::tileset::Tileset;
@@ -30,7 +30,13 @@ impl Animation {
 
     pub fn update(&mut self) {
         if let Some(mut i) = self.frames.iter().position(|a| a == &self.current) {
-            if let Some(delay) = self.current.properties.delay {
+            if let Some(mut delay) = self.current.properties.delay {
+                if let Some(scramble_delay) = self.current.properties.scramble_delay {
+                    if scramble_delay {
+                        delay = rand::thread_rng().gen_range(delay as f32 * 0.6, delay as f32 * 1.4)
+                            as usize;
+                    }
+                }
                 if self.timer.elapsed().as_millis() > delay as u128 {
                     i = if i == self.frames.len() - 1 { 0 } else { i + 1 };
                     self.current = self.frames[i].clone();
@@ -43,16 +49,7 @@ impl Animation {
     }
 
     pub fn draw(&self, spritebatch: &mut SpriteBatch, position: Point2<f32>) {
-        if self.current.properties.visible.is_none() {
-            spritebatch.add(
-                DrawParam::default()
-                    .src(self.current.source)
-                    .rotation(self.current.properties.rotation)
-                    .offset(Point2::new(0.5, 0.5))
-                    .dest(position)
-                    .scale(Vector2::new(constants::TILE_SCALE, constants::TILE_SCALE)),
-            );
-        }
+        self.current.draw(spritebatch, position);
     }
 }
 

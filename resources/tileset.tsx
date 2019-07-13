@@ -4,6 +4,7 @@
  <tile id="14">
   <properties>
    <property name="delay" type="int" value="100"/>
+   <property name="scramble_delay" type="bool" value="true"/>
    <property name="entity" value="flame"/>
    <property name="keyframe" type="int" value="0"/>
   </properties>
@@ -17,6 +18,7 @@
  <tile id="24">
   <properties>
    <property name="delay" type="int" value="100"/>
+   <property name="scramble_delay" type="bool" value="true"/>
    <property name="entity" value="flame"/>
    <property name="keyframe" type="int" value="1"/>
   </properties>
