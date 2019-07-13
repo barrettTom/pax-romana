@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use crate::animations::Animation;
 use crate::constants::{self, FLIP_A, FLIP_D, FLIP_H, FLIP_V};
-use crate::tile::{Properties, Tile, flip, rotate};
+use crate::tile::{flip, rotate, Properties, Tile};
 use crate::xmlelements::XMLElements;
 
 pub struct Tileset {

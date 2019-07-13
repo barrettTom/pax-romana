@@ -5,7 +5,7 @@ use std::time::Instant;
 
 use crate::constants;
 use crate::entity::Action;
-use crate::tile::{Tile, flip};
+use crate::tile::{flip, Tile};
 use crate::tileset::Tileset;
 
 #[derive(Debug, Clone, PartialEq)]

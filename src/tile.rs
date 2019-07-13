@@ -1,6 +1,6 @@
 use ggez::graphics::Rect;
-use xml::reader::XmlEvent;
 use std::f32::consts::PI;
+use xml::reader::XmlEvent;
 
 use crate::xmlelements::XMLElements;
 
