@@ -95,9 +95,7 @@ impl Tileset {
         let first_tile = self
             .tiles
             .iter()
-            .find(
-                |(id, _)| id == &&tile_id
-            )
+            .find(|(id, _)| id == &&tile_id)
             .unwrap()
             .1
             .clone();
@@ -109,11 +107,14 @@ impl Tileset {
                     .cloned()
                     .filter(|t| {
                         t.properties.entity == first_tile.properties.entity
-                            && (t.properties.rotation - first_tile.properties.rotation) < constants::FLOAT_PRECISION
-                            && t.source.x.is_sign_positive() == first_tile.source.x.is_sign_positive()
-                            && t.source.y.is_sign_positive() == first_tile.source.y.is_sign_positive()
+                            && (t.properties.rotation - first_tile.properties.rotation)
+                                < constants::FLOAT_PRECISION
+                            && t.source.x.is_sign_positive()
+                                == first_tile.source.x.is_sign_positive()
+                            && t.source.y.is_sign_positive()
+                                == first_tile.source.y.is_sign_positive()
                     })
-                    .collect()
+                    .collect(),
             )
         } else {
             Animation::new(vec![first_tile])
