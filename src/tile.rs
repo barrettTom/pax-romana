@@ -1,5 +1,6 @@
 use ggez::graphics::Rect;
 use xml::reader::XmlEvent;
+use std::f32::consts::PI;
 
 use crate::xmlelements::XMLElements;
 
@@ -12,11 +13,6 @@ pub struct Tile {
 impl Tile {
     pub fn new(source: Rect, properties: Properties) -> Tile {
         Tile { source, properties }
-    }
-
-    pub fn flip(&mut self) {
-        self.source.x *= -1.0;
-        self.source.x -= self.source.w;
     }
 }
 
@@ -78,4 +74,21 @@ impl Default for Properties {
             visible: None,
         }
     }
+}
+
+pub fn convert_angle_to_rad(angle: f32) -> f32 {
+    angle * (PI / 180.0)
+}
+
+pub fn flip(tile: Tile) -> Tile {
+    let mut t = tile.clone();
+    t.source.x *= -1.0;
+    t.source.x -= t.source.w;
+    t
+}
+
+pub fn rotate(tile: Tile, angle: f32) -> Tile {
+    let mut t = tile.clone();
+    t.properties.rotation = convert_angle_to_rad(angle);
+    t
 }

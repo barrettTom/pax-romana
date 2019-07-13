@@ -5,7 +5,7 @@ use std::time::Instant;
 
 use crate::constants;
 use crate::entity::Action;
-use crate::tile::Tile;
+use crate::tile::{Tile, flip};
 use crate::tileset::Tileset;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -80,8 +80,8 @@ impl Animations {
         available.insert(Action::MovingUpLeft, animation.clone());
         available.insert(Action::MovingDownLeft, animation.clone());
 
-        idle.flip();
-        moving.flip();
+        let idle = flip(idle);
+        let moving = flip(moving);
 
         let animation = Animation::new(vec![idle.clone()]);
         available.insert(Action::IdleRight, animation.clone());

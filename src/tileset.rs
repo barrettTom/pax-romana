@@ -1,11 +1,10 @@
 use ggez::filesystem::File;
 use ggez::graphics::Rect;
 use std::collections::HashMap;
-use std::f32::consts::PI;
 
 use crate::animations::Animation;
 use crate::constants::{self, FLIP_A, FLIP_D, FLIP_H, FLIP_V};
-use crate::tile::{Properties, Tile};
+use crate::tile::{Properties, Tile, flip, rotate};
 use crate::xmlelements::XMLElements;
 
 pub struct Tileset {
@@ -134,21 +133,4 @@ impl Tileset {
             .unwrap()
             .clone()
     }
-}
-
-pub fn convert_angle_to_rad(angle: f32) -> f32 {
-    angle * (PI / 180.0)
-}
-
-fn flip(tile: Tile) -> Tile {
-    let mut t = tile.clone();
-    t.source.x *= -1.0;
-    t.source.x -= t.source.w;
-    t
-}
-
-fn rotate(tile: Tile, angle: f32) -> Tile {
-    let mut t = tile.clone();
-    t.properties.rotation = convert_angle_to_rad(angle);
-    t
 }
