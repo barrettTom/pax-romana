@@ -7,4 +7,3 @@
 * textbox (with dialog options)
 
 * impl EventHandler instead of Operable?
-* npc movement

@@ -78,17 +78,6 @@ impl Properties {
                 Err(_) => None,
             };
 
-        /*
-        if scramble_delay {
-            println!("in");
-            let mut rng = rand::thread_rng();
-            let d = delay.unwrap() as f32;
-            let normal = Normal::new(d, d * 0.50).unwrap();
-            delay = Some(normal.sample(&mut rng) as usize);
-            println!("{:?}", delay);
-        }
-        */
-
         Properties {
             rotation: 0.0,
             entity,

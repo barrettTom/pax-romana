@@ -24,8 +24,8 @@ impl Operable for NPC {
 
     fn update(&mut self) {
         match self.behavior {
-            Behavior::Wandering(destination) => self.wandering(destination),
-            Behavior::Waiting(time) => self.waiting(time),
+            Behavior::Wandering(destination) => self.move_torwards(destination),
+            Behavior::Waiting(time) => self.wait(time),
         }
         self.entity.update();
         self.animations.update(&self.entity.action);
@@ -41,7 +41,7 @@ impl NPC {
         }
     }
 
-    fn wandering(&mut self, destination: Point2<f32>) {
+    fn move_torwards(&mut self, destination: Point2<f32>) {
         let position = self.entity.position;
 
         if distance(&position, &destination) < constants::GOAL_DISTANCE {
@@ -74,7 +74,7 @@ impl NPC {
         }
     }
 
-    fn waiting(&mut self, start: Instant) {
+    fn wait(&mut self, start: Instant) {
         if start.elapsed().as_secs() > constants::WAIT_TIME {
             self.behavior = Behavior::Wandering(random_nearby_point(
                 self.entity.spawn,
