@@ -1,5 +1,5 @@
+use ggez::conf::Conf;
 use ggez::nalgebra::Point2;
-use ggez::Context;
 
 use crate::constants;
 
@@ -10,13 +10,11 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(context: &mut Context, map_dimensions: (f32, f32)) -> Camera {
+    pub fn new(map_dimensions: (f32, f32)) -> Camera {
+        let conf = Conf::new();
         Camera {
             draw: Point2::new(0.0, 0.0),
-            window_dimensions: (
-                context.conf.window_mode.width,
-                context.conf.window_mode.height,
-            ),
+            window_dimensions: (conf.window_mode.width, conf.window_mode.height),
             map_dimensions,
         }
     }

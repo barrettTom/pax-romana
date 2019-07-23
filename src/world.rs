@@ -30,7 +30,7 @@ impl World {
         Ok(World {
             map: map.clone(),
             spritebatch: SpriteBatch::new(image),
-            camera: Camera::new(context, map.get_dimensions()),
+            camera: Camera::new(map.get_dimensions()),
             player: Player::new(
                 &tileset,
                 map.get_spawn_points("player")[0],
