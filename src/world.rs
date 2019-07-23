@@ -9,7 +9,7 @@ use crate::npc::NPC;
 use crate::player::Player;
 use crate::tileset::Tileset;
 
-pub struct State {
+pub struct World {
     map: Map,
     spritebatch: SpriteBatch,
     camera: Camera,
@@ -17,8 +17,8 @@ pub struct State {
     npcs: Vec<NPC>,
 }
 
-impl State {
-    pub fn new(context: &mut Context) -> GameResult<State> {
+impl World {
+    pub fn new(context: &mut Context) -> GameResult<World> {
         let mut image = Image::new(context, "/tileset.png")?;
         image.set_filter(FilterMode::Nearest);
         image.set_wrap(WrapMode::Mirror, WrapMode::Mirror);
@@ -27,7 +27,7 @@ impl State {
 
         let map = Map::new(filesystem::open(context, "/map.tmx")?, &tileset);
 
-        Ok(State {
+        Ok(World {
             map: map.clone(),
             spritebatch: SpriteBatch::new(image),
             camera: Camera::new(context, map.get_dimensions()),
@@ -41,7 +41,7 @@ impl State {
     }
 }
 
-impl EventHandler for State {
+impl EventHandler for World {
     fn update(&mut self, _context: &mut Context) -> GameResult {
         self.map.update();
         self.player.update();

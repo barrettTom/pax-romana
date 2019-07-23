@@ -7,7 +7,7 @@ pub mod layer;
 pub mod map;
 pub mod npc;
 pub mod player;
-pub mod state;
 pub mod tile;
 pub mod tileset;
+pub mod world;
 pub mod xmlelements;

@@ -13,7 +13,7 @@ pub struct Entity {
     pub position: Point2<f32>,
     pub spawn: Point2<f32>,
     pub action: Action,
-    pub map_dimensions: (f32, f32),
+    map_dimensions: (f32, f32),
 }
 
 impl Entity {

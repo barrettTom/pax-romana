@@ -10,9 +10,9 @@ use crate::tileset::Tileset;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Animation {
-    pub frames: Vec<Tile>,
-    pub timer: Instant,
-    pub current: Tile,
+    frames: Vec<Tile>,
+    timer: Instant,
+    current: Tile,
 }
 
 impl Animation {
@@ -55,8 +55,8 @@ impl Animation {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Animations {
-    pub available: HashMap<Action, Animation>,
-    pub current: Animation,
+    available: HashMap<Action, Animation>,
+    current: Animation,
 }
 
 impl Animations {

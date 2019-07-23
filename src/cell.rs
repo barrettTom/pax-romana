@@ -9,8 +9,8 @@ use crate::tileset::Tileset;
 #[derive(Debug, Clone)]
 pub struct Cell {
     pub id: usize,
-    pub animation: Animation,
     pub destination: Point2<f32>,
+    animation: Animation,
 }
 
 impl Operable for Cell {
