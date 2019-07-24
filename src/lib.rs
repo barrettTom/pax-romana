@@ -2,6 +2,7 @@ pub mod animations;
 pub mod camera;
 pub mod cell;
 pub mod constants;
+pub mod dialogbox;
 pub mod entity;
 pub mod layer;
 pub mod map;

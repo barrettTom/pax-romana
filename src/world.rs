@@ -3,6 +3,7 @@ use ggez::graphics::{self, spritebatch::SpriteBatch, DrawParam, FilterMode, Imag
 use ggez::{filesystem, Context, GameResult};
 
 use crate::camera::Camera;
+use crate::dialogbox::DialogBox;
 use crate::entity::Operable;
 use crate::map::Map;
 use crate::npc::NPC;
@@ -12,6 +13,7 @@ use crate::tileset::Tileset;
 pub struct World {
     map: Map,
     spritebatch: SpriteBatch,
+    dialogbox: DialogBox,
     camera: Camera,
     player: Player,
     npcs: Vec<NPC>,
@@ -30,6 +32,7 @@ impl World {
         Ok(World {
             map: map.clone(),
             spritebatch: SpriteBatch::new(image),
+            dialogbox: DialogBox::new(context),
             camera: Camera::new(map.get_dimensions()),
             player: Player::new(
                 &tileset,
@@ -68,6 +71,8 @@ impl EventHandler for World {
             DrawParam::default().dest(self.camera.draw),
         )?;
 
+        self.dialogbox.draw(context)?;
+
         self.spritebatch.clear();
 
         graphics::present(context)?;
@@ -89,6 +94,7 @@ impl EventHandler for World {
         if !repeat {
             match keycode {
                 KeyCode::Q => context.continuing = false,
+                KeyCode::E => self.dialogbox.visible = !self.dialogbox.visible,
                 _ => self.player.give_key_down(keycode),
             }
         }
