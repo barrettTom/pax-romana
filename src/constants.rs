@@ -4,7 +4,7 @@ pub const TILE_SCALE: f32 = 2.75;
 
 pub const PLAYER_SPEED: f32 = 3.0;
 pub const WANDER_DISTANCE: f32 = 200.0;
-pub const GOAL_DISTANCE: f32 = 10.0;
+pub const INTERACT_DISTANCE: f32 = 30.0;
 pub const WAIT_TIME: u64 = 3;
 
 pub const FLOAT_PRECISION: f32 = 0.001;

@@ -1,20 +1,39 @@
 use ggez::graphics::spritebatch::SpriteBatch;
 use ggez::nalgebra::{distance, Point2};
+use ggez::Context;
 use rand::Rng;
 use std::f32::consts::PI;
 use std::time::Instant;
 
 use crate::animations::Animations;
 use crate::constants;
+use crate::dialogbox::DialogTree;
 use crate::entity::{Action, Entity, Operable};
 use crate::map::Map;
 use crate::tileset::Tileset;
 
-#[derive(Clone)]
+#[derive(Debug, Clone, Copy)]
+pub enum Character {
+    Player,
+    Peasant,
+}
+
+impl Character {
+    pub fn to_str(&self) -> &str {
+        match self {
+            Character::Player => "player",
+            Character::Peasant => "peasant",
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct NPC {
-    entity: Entity,
+    pub entity: Entity,
     behavior: Behavior,
     animations: Animations,
+    dialogtree: DialogTree,
+    character: Character,
 }
 
 impl Operable for NPC {
@@ -26,6 +45,7 @@ impl Operable for NPC {
         match self.behavior {
             Behavior::Wandering(destination) => self.move_torwards(destination),
             Behavior::Waiting(time) => self.wait(time),
+            Behavior::Talking => (),
         }
         self.entity.update();
         self.animations.update(&self.entity.action);
@@ -33,8 +53,16 @@ impl Operable for NPC {
 }
 
 impl NPC {
-    pub fn new(tileset: &Tileset, spawn: Point2<f32>, map_dimensions: (f32, f32)) -> NPC {
+    pub fn new(
+        character: Character,
+        context: &mut Context,
+        tileset: &Tileset,
+        spawn: Point2<f32>,
+        map_dimensions: (f32, f32),
+    ) -> NPC {
         NPC {
+            character,
+            dialogtree: DialogTree::new(context, character),
             entity: Entity::new(spawn, map_dimensions),
             behavior: Behavior::Wandering(random_nearby_point(spawn, constants::WANDER_DISTANCE)),
             animations: Animations::new(tileset),
@@ -44,16 +72,16 @@ impl NPC {
     fn move_torwards(&mut self, destination: Point2<f32>) {
         let position = self.entity.position;
 
-        if distance(&position, &destination) < constants::GOAL_DISTANCE {
+        if distance(&position, &destination) < constants::INTERACT_DISTANCE {
             self.entity.action = Action::IdleRight;
             self.behavior = Behavior::Waiting(Instant::now());
-        } else if (position.x - destination.x).abs() < constants::GOAL_DISTANCE {
+        } else if (position.x - destination.x).abs() < constants::INTERACT_DISTANCE {
             if position.y > destination.y {
                 self.entity.action = Action::MovingUp;
             } else {
                 self.entity.action = Action::MovingDown;
             }
-        } else if (position.y - destination.y).abs() < constants::GOAL_DISTANCE {
+        } else if (position.y - destination.y).abs() < constants::INTERACT_DISTANCE {
             if position.x > destination.x {
                 self.entity.action = Action::MovingLeft;
             } else {
@@ -83,19 +111,32 @@ impl NPC {
         }
     }
 
-    pub fn build_npcs(tileset: &Tileset, map: &Map) -> Vec<NPC> {
+    pub fn get_dialogtree(&mut self) -> DialogTree {
+        self.behavior = Behavior::Talking;
+        self.dialogtree.clone()
+    }
+
+    pub fn build_npcs(context: &mut Context, tileset: &Tileset, map: &Map) -> Vec<NPC> {
         let mut npcs = Vec::new();
 
-        for point in map.get_spawn_points("peasant") {
-            npcs.push(NPC::new(tileset, point, map.get_dimensions()));
+        let character = Character::Peasant;
+        for point in map.get_spawn_points(character) {
+            npcs.push(NPC::new(
+                character,
+                context,
+                tileset,
+                point,
+                map.get_dimensions(),
+            ));
         }
 
         npcs
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 enum Behavior {
+    Talking,
     Waiting(Instant),
     Wandering(Point2<f32>),
 }

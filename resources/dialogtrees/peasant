@@ -1,0 +1,23 @@
+{
+   "0" : {
+      "text" : "Ave !",
+      "responses" : [
+         [
+            1,
+            "Unde venistis ?"
+         ],
+         [
+            2,
+            "Esurio !"
+         ]
+      ]
+   },
+   "1" : {
+      "text" : "Roma !",
+      "responses" : []
+   },
+   "2" : {
+      "responses" : [],
+      "text" : "Paenitet !"
+   }
+}

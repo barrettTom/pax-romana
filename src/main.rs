@@ -1,7 +1,7 @@
 use ggez::conf::{NumSamples, WindowSetup};
 use ggez::{event, ContextBuilder, GameResult};
 
-use pax_romana::world::World;
+use pax_romana::game::Game;
 
 fn main() -> GameResult {
     let (ref mut context, ref mut event_loop) = ContextBuilder::new("pax-romana", "tom barrett")
@@ -13,7 +13,7 @@ fn main() -> GameResult {
         .add_resource_path("./resources")
         .build()?;
 
-    let state = &mut World::new(context)?;
+    let game = &mut Game::new(context)?;
 
-    event::run(context, event_loop, state)
+    event::run(context, event_loop, game)
 }

@@ -4,6 +4,7 @@ pub mod cell;
 pub mod constants;
 pub mod dialogbox;
 pub mod entity;
+pub mod game;
 pub mod layer;
 pub mod map;
 pub mod npc;

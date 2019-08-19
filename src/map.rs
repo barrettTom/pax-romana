@@ -7,6 +7,7 @@ use xml::reader::XmlEvent::Characters;
 use crate::constants;
 use crate::entity::Operable;
 use crate::layer::Layer;
+use crate::npc::Character;
 use crate::tile::Tile;
 use crate::tileset::Tileset;
 use crate::xmlelements::XMLElements;
@@ -90,11 +91,11 @@ impl Map {
         spawn_points
     }
 
-    pub fn get_spawn_points(&self, name: &str) -> Vec<Point2<f32>> {
+    pub fn get_spawn_points(&self, character: Character) -> Vec<Point2<f32>> {
         self.spawns
             .clone()
             .into_iter()
-            .filter(|s| s.0 == name)
+            .filter(|s| s.0 == character.to_str())
             .map(|s| s.1)
             .collect()
     }

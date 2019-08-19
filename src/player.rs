@@ -6,8 +6,9 @@ use crate::animations::Animations;
 use crate::entity::{Action, Entity, Operable};
 use crate::tileset::Tileset;
 
+#[derive(Clone)]
 pub struct Player {
-    entity: Entity,
+    pub entity: Entity,
     animations: Animations,
 }
 

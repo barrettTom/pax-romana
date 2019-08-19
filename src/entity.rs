@@ -8,7 +8,7 @@ pub trait Operable {
     fn draw(&self, spritebatch: &mut SpriteBatch);
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Entity {
     pub position: Point2<f32>,
     pub spawn: Point2<f32>,
