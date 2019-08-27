@@ -116,6 +116,17 @@ impl NPC {
         self.dialogtree.clone()
     }
 
+    pub fn is_talking(&self) -> bool {
+        self.behavior == Behavior::Talking
+    }
+
+    pub fn stop_talking(&mut self) {
+        self.behavior = Behavior::Wandering(random_nearby_point(
+            self.entity.spawn,
+            constants::WANDER_DISTANCE,
+        ));
+    }
+
     pub fn build_npcs(context: &mut Context, tileset: &Tileset, map: &Map) -> Vec<NPC> {
         let mut npcs = Vec::new();
 
@@ -134,7 +145,7 @@ impl NPC {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 enum Behavior {
     Talking,
     Waiting(Instant),

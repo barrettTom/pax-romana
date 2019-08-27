@@ -36,8 +36,8 @@ impl DialogTree {
 #[derive(Clone)]
 pub struct DialogBox {
     dialogtree: Option<DialogTree>,
+    dialog: Option<Dialog>,
     font: Font,
-    text: Option<Text>,
     mesh: Mesh,
     conf: Conf,
 }
@@ -48,8 +48,8 @@ impl DialogBox {
 
         DialogBox {
             dialogtree: None,
+            dialog: None,
             font: Font::new(context, "/fonts/SONORM__.ttf").unwrap(),
-            text: None,
             mesh: MeshBuilder::new()
                 .rectangle(
                     DrawMode::fill(),
@@ -67,26 +67,28 @@ impl DialogBox {
         }
     }
 
+    pub fn is_visible(&self) -> bool {
+        self.dialogtree.is_some()
+    }
+
     pub fn update(&mut self) {
-        if let Some(dialogtree) = &self.dialogtree {
-            if self.text.is_none() {
-                self.text = Some(Text::new(
-                    TextFragment::new(dialogtree.dialogs.get(&0).unwrap().text.as_str())
-                        .font(self.font)
-                        .scale(Scale::uniform(40.0)),
-                ));
-            }
-        } else {
-            self.text = None;
+        if self.dialogtree.is_none() {
+            self.dialog = None;
         }
     }
 
     pub fn draw(&self, context: &mut Context) -> GameResult {
-        if let Some(text) = &self.text {
+        if let Some(dialog) = &self.dialog {
+            let text = Text::new(
+                TextFragment::new(dialog.text.as_str())
+                    .font(self.font)
+                    .scale(Scale::uniform(40.0)),
+            );
+
             graphics::draw(context, &self.mesh, DrawParam::default())?;
             graphics::draw(
                 context,
-                text,
+                &text,
                 DrawParam::default().dest(Point2::new(
                     self.conf.window_mode.width * 0.11,
                     2.6 * self.conf.window_mode.height / 4.0,
@@ -99,5 +101,8 @@ impl DialogBox {
 
     pub fn give_dialogtree(&mut self, dialogtree: Option<DialogTree>) {
         self.dialogtree = dialogtree;
+        if let Some(dialogtree) = &self.dialogtree {
+            self.dialog = dialogtree.dialogs.get(&0).cloned();
+        }
     }
 }

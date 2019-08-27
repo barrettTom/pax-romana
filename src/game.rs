@@ -35,6 +35,11 @@ impl EventHandler for Game {
     fn update(&mut self, _context: &mut Context) -> GameResult {
         self.world.update();
         self.camera.give_center(self.world.player.get_position());
+
+        if !self.world.player_in_talking_range() {
+            self.dialogbox.give_dialogtree(None);
+        }
+
         self.dialogbox.update();
         Ok(())
     }

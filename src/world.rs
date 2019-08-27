@@ -52,6 +52,21 @@ impl World {
         }
     }
 
+    pub fn player_in_talking_range(&mut self) -> bool {
+        if let Some(npc) = self.npcs.iter_mut().find(|npc| npc.is_talking()) {
+            if constants::INTERACT_DISTANCE
+                > distance(&self.player.entity.position, &npc.entity.position)
+            {
+                true
+            } else {
+                npc.stop_talking();
+                false
+            }
+        } else {
+            false
+        }
+    }
+
     pub fn get_dialogtree(&mut self) -> Option<DialogTree> {
         let player_position = self.player.entity.position;
         if let Some(npc) = self.npcs.iter_mut().find(|npc| {
