@@ -35,8 +35,7 @@ impl DialogTree {
 
 #[derive(Clone)]
 pub struct DialogBox {
-    dialogtree: Option<DialogTree>,
-    dialog: Option<Dialog>,
+    display: Option<(Dialog, DialogTree, usize)>,
     font: Font,
     mesh: Mesh,
     conf: Conf,
@@ -47,8 +46,7 @@ impl DialogBox {
         let conf = Conf::new();
 
         DialogBox {
-            dialogtree: None,
-            dialog: None,
+            display: None,
             font: Font::new(context, "/fonts/SONORM__.ttf").unwrap(),
             mesh: MeshBuilder::new()
                 .rectangle(
@@ -68,17 +66,13 @@ impl DialogBox {
     }
 
     pub fn is_visible(&self) -> bool {
-        self.dialogtree.is_some()
+        self.display.is_some()
     }
 
-    pub fn update(&mut self) {
-        if self.dialogtree.is_none() {
-            self.dialog = None;
-        }
-    }
+    pub fn update(&mut self) {}
 
     pub fn draw(&self, context: &mut Context) -> GameResult {
-        if let Some(dialog) = &self.dialog {
+        if let Some((dialog, _, selected_response)) = &self.display {
             let text = Text::new(
                 TextFragment::new(dialog.text.as_str())
                     .font(self.font)
@@ -94,15 +88,80 @@ impl DialogBox {
                     2.6 * self.conf.window_mode.height / 4.0,
                 )),
             )?;
+
+            for (i, response) in dialog.responses.iter().enumerate() {
+                let color = if &i == selected_response {
+                    constants::GOLD
+                } else {
+                    constants::WHITE
+                };
+
+                let text = Text::new(
+                    TextFragment::new(response.1.as_str())
+                        .font(self.font)
+                        .scale(Scale::uniform(40.0)),
+                );
+
+                graphics::draw(
+                    context,
+                    &text,
+                    DrawParam::default()
+                        .dest(Point2::new(
+                            self.conf.window_mode.width * 0.11,
+                            (2.6 + (0.25 * (i + 1) as f32)) * self.conf.window_mode.height / 4.0,
+                        ))
+                        .color(color),
+                )?;
+            }
         }
 
         Ok(())
     }
 
-    pub fn give_dialogtree(&mut self, dialogtree: Option<DialogTree>) {
-        self.dialogtree = dialogtree;
-        if let Some(dialogtree) = &self.dialogtree {
-            self.dialog = dialogtree.dialogs.get(&0).cloned();
+    pub fn populate_display(&mut self, dialogtree: Option<DialogTree>) {
+        if let Some(dialogtree) = &dialogtree {
+            let dialog = dialogtree.dialogs.get(&0).unwrap();
+            self.display = Some((dialog.clone(), dialogtree.clone(), 0));
+        } else {
+            self.display = None;
+        }
+    }
+
+    pub fn choose_reponse(&mut self) {
+        if let Some((dialog, dialogtree, selected_response)) = &self.display.clone() {
+            if let Some(selected_dialog) = dialog.responses.get(*selected_response) {
+                if let Some(new_dialog) = dialogtree.dialogs.get(&selected_dialog.0) {
+                    self.display = Some((new_dialog.clone(), dialogtree.clone(), 0));
+                }
+            }
+        }
+    }
+
+    pub fn next_response(&mut self) {
+        if let Some((dialog, dialogtree, selected_response)) = &self.display.clone() {
+            let new_selected_response =
+                if Some(*selected_response) < dialog.responses.len().checked_sub(1) {
+                    selected_response + 1
+                } else {
+                    0
+                };
+
+            self.display = Some((dialog.clone(), dialogtree.clone(), new_selected_response));
+        }
+    }
+
+    pub fn prev_response(&mut self) {
+        if let Some((dialog, dialogtree, selected_response)) = &self.display.clone() {
+            let new_selected_response = if selected_response == &0 {
+                match dialog.responses.len().checked_sub(1) {
+                    Some(i) => i,
+                    None => 0,
+                }
+            } else {
+                selected_response - 1
+            };
+
+            self.display = Some((dialog.clone(), dialogtree.clone(), new_selected_response));
         }
     }
 }

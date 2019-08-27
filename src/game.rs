@@ -37,7 +37,7 @@ impl EventHandler for Game {
         self.camera.give_center(self.world.player.get_position());
 
         if !self.world.player_in_talking_range() {
-            self.dialogbox.give_dialogtree(None);
+            self.dialogbox.populate_display(None);
         }
 
         self.dialogbox.update();
@@ -78,7 +78,10 @@ impl EventHandler for Game {
         if !repeat {
             match keycode {
                 KeyCode::Q => context.continuing = false,
-                KeyCode::E => self.dialogbox.give_dialogtree(self.world.get_dialogtree()),
+                KeyCode::E => self.dialogbox.populate_display(self.world.get_dialogtree()),
+                KeyCode::J => self.dialogbox.next_response(),
+                KeyCode::K => self.dialogbox.prev_response(),
+                KeyCode::Return => self.dialogbox.choose_reponse(),
                 _ => self.world.give_key_down(keycode),
             }
         }
