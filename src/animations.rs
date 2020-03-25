@@ -67,7 +67,7 @@ impl Animations {
         idle.source.h *= 2.0;
 
         let animation = Animation::new(vec![idle.clone()]);
-        available.insert(Action::IdleLeft, animation.clone());
+        available.insert(Action::IdleLeft, animation);
 
         let mut moving = tileset.get_tile_by_entity_keyframe("player-top", 1);
         moving.source.h *= 2.0;
@@ -75,15 +75,15 @@ impl Animations {
         let animation = Animation::new(vec![idle.clone(), moving.clone()]);
         available.insert(Action::MovingLeft, animation.clone());
         available.insert(Action::MovingUpLeft, animation.clone());
-        available.insert(Action::MovingDownLeft, animation.clone());
+        available.insert(Action::MovingDownLeft, animation);
 
         let idle = flip(idle);
         let moving = flip(moving);
 
         let animation = Animation::new(vec![idle.clone()]);
-        available.insert(Action::IdleRight, animation.clone());
+        available.insert(Action::IdleRight, animation);
 
-        let animation = Animation::new(vec![idle.clone(), moving.clone()]);
+        let animation = Animation::new(vec![idle, moving]);
         available.insert(Action::MovingRight, animation.clone());
         available.insert(Action::MovingUpRight, animation.clone());
         available.insert(Action::MovingDownRight, animation.clone());

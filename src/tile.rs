@@ -109,14 +109,14 @@ pub fn convert_angle_to_rad(angle: f32) -> f32 {
 }
 
 pub fn flip(tile: Tile) -> Tile {
-    let mut t = tile.clone();
+    let mut t = tile;
     t.source.x *= -1.0;
     t.source.x -= t.source.w;
     t
 }
 
 pub fn rotate(tile: Tile, angle: f32) -> Tile {
-    let mut t = tile.clone();
+    let mut t = tile;
     t.properties.rotation = convert_angle_to_rad(angle);
     t
 }
